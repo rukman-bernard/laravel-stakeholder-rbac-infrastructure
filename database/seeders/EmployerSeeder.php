@@ -2,38 +2,67 @@
 
 namespace Database\Seeders;
 
+use App\Models\Employer;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
-use App\Models\Employer;
 
 class EmployerSeeder extends Seeder
 {
     public function run(): void
     {
-        Employer::create([
+        /**
+         * 1) Baseline employer (idempotent)
+         * Keyed by email so re-running won't create duplicates.
+         */
+        Employer::updateOrCreate(
+            ['email' => 'employer@example.com'],
+            [
                 'name' => 'Employer',
-                'email' => "employer@example.com",
-                'image_path' => '', // or use fake()->imageUrl() 
+                'image_path' => '',
                 'password' => Hash::make('password'),
-                'remember_token' => Str::random(60),
                 'phone' => fake()->phoneNumber(),
+            ]
+        );
 
-        ]);
+        /**
+         * 2) Dummy employers (bounded growth)
+         * We want 20 total employers (1 baseline + 19 dummy).
+         * Only create the missing amount.
+         */
+        $targetTotal = 20;
+        $current = Employer::count();
 
-        for ($i = 1; $i <= 19; $i++) {
-            $fakeCompany = fake()->company();
-            $prefix = strtolower(strtok($fakeCompany, ' '));
-            $prefix = preg_replace('/[^a-z0-9]/', '', $prefix); // keep only alphanumeric
-            $fakeEamil = $prefix.$i.'@gmail.com';
-            Employer::create([
-                'name' => $fakeCompany,
-                'email' => $fakeEamil,
-                'image_path' => '', // or use fake()->imageUrl()
-                'password' => Hash::make('password'),
-                'remember_token' => Str::random(60),
-                'phone' => fake()->phoneNumber(),
-            ]);
+        if ($current < $targetTotal) {
+            $toCreate = $targetTotal - $current;
+
+            for ($i = 1; $i <= $toCreate; $i++) {
+                $fakeCompany = fake()->company();
+
+                // Keep your deterministic-ish email style, but ensure uniqueness
+                $prefix = strtolower(strtok($fakeCompany, ' '));
+                $prefix = preg_replace('/[^a-z0-9]/', '', $prefix) ?: 'company';
+
+                // Make an email that is unlikely to collide with existing ones
+                $email = $prefix . fake()->unique()->numberBetween(1000, 9999) . '@gmail.com';
+
+                Employer::updateOrCreate(
+                    ['email' => $email],
+                    [
+                        'name' => $fakeCompany,
+                        'image_path' => '',
+                        'password' => Hash::make('password'),
+                        'phone' => fake()->phoneNumber(),
+                    ]
+                );
+            }
         }
+
+        /**
+         * Note:
+         * - We intentionally do NOT set remember_token here.
+         *   Laravel will manage it during authentication.
+         * - If you insist on having it seeded, set it only on create,
+         *   but avoid regenerating it on every run.
+         */
     }
 }

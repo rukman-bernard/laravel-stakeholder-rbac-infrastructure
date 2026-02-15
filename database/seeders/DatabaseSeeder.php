@@ -12,50 +12,39 @@ class DatabaseSeeder extends Seeder
 {
 
     public function run(): void
-    {
-
-
-        // Automatically run 'all' group in testing environment
-    if (app()->environment('testing')) 
-    {
+{
+    // Testing: only what you want, always ordered
+    if (app()->environment('testing')) {
         $this->call([
             SpatieSeeder::class,
             StakeholderSeeder::class,
-            ProgrammeDetailsSeeder::class,
         ]);
         return;
     }
 
+    $options = [
+        'spatie' => 'SpatieSeeder (Roles & Permissions)',
+        'stakeholder' => 'StakeholderSeeder (Users & Students) (auto-runs Spatie first)',
+        'both' => 'Run Spatie + Stakeholder (recommended)',
+        'none' => 'Exit without seeding',
+    ];
 
-    
-        $options = [
-            'spatie' => 'SpatieSeeder (Roles & Permissions)',
-            'stakeholder' => 'StakeholderSeeder (Users & Students)',
-            'programme' => 'ProgrammeDetailsSeeder (Programmes, Levels, Skills, etc.)',
-            'studentPortal' => 'StudentPortalSeeder(StudentOptionalModuleSeeder, etc.)',
-            'all' => 'Run ALL seeders',
-            'none' => 'Exit without seeding',
-        ];
+    $choice = $this->command->choice(
+        'Which seeder group would you like to run?',
+        $options,
+        'none'
+    );
 
-        $choice = $this->command->choice(
-            'Which seeder group would you like to run?',
-            $options,
-            'none'
-        );
+    match ($choice) {
+        'spatie' => $this->call([SpatieSeeder::class]),
+        'stakeholder' => $this->call([StakeholderSeeder::class]), // safe: enforces dependency internally
+        'both' => $this->call([
+            SpatieSeeder::class,
+            StakeholderSeeder::class,
+        ]),
+        default => $this->command->info('No seeders were run.'),
+    };
+}
 
-        match ($choice) {
-            'spatie' => $this->call([SpatieSeeder::class]),
-            'stakeholder' => $this->call([StakeholderSeeder::class]),
-            'programme' => $this->call([ProgrammeDetailsSeeder::class]),
-            'studentPortal' => $this->call([StudentPortalSeeder::class]),
-            'all' => $this->call([
-                SpatieSeeder::class,
-                StakeholderSeeder::class,
-                ProgrammeDetailsSeeder::class,
-                StudentPortalSeeder::class,
-            ]),
-            default => $this->command->info('No seeders were run.'),
-        };
-    }
 
 }
