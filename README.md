@@ -18,6 +18,9 @@ docker compose exec laravel php artisan key:generate --force
 docker compose exec laravel php artisan storage:link
 docker compose exec laravel php artisan migrate --seed
 ```
+For a detailed explanation of the Docker runtime lifecycle, entrypoint behaviour, bind-mount implications, and Composer installation strategy, see:
+
+[Docker Setup Documentation](./docs/)
 
 ### Access points
 | Service     | URL                     |
@@ -162,7 +165,7 @@ This structure enables:
 Redis usage can be independently verified via CLI-level inspection.
 
 ***
-## 7\. Repository Structure (High-Level)
+## 7. Repository Structure (High-Level)
 | Directory    | Purpose                                   |
 | ------------ | ----------------------------------------- |
 | `app/`       | Core application logic                    |
@@ -208,7 +211,7 @@ This design supports safe scaling without architectural modification.
 
 ***
 
-## 10. Operational Verification
+## 10. Infrastructure Verification
 
 For detailed Redis verification procedures (Cache / Queue / Session), including CLI-based proof steps, see:
 
