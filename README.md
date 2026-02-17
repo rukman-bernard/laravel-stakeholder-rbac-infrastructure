@@ -18,9 +18,13 @@ docker compose exec laravel php artisan key:generate --force
 docker compose exec laravel php artisan storage:link
 docker compose exec laravel php artisan migrate --seed
 ```
+
+> Note: PHP dependencies (`vendor/`) are installed into the project directory via the Laravel container.
+> Node dependencies (`node_modules/`) are stored in a Docker named volume to keep the repository clean and improve performance.
+
 For a detailed explanation of the Docker runtime lifecycle, entrypoint behaviour, bind-mount implications, and Composer installation strategy, see:
 
-[Docker Setup Documentation](./docs/)
+[Docker Setup Documentation](./docs/docker-setup.md)
 
 ### Access points
 | Service     | URL                     |
