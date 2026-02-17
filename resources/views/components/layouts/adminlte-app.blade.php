@@ -1,20 +1,14 @@
-{{-- resources/views/components/layouts/adminlte-app.blade.php --}}
-@php $guard = app(\App\Services\Auth\GuardResolver::class)->detect(); @endphp
 @extends('adminlte::page')
 
-{{-- Page <title> --}}
+{{-- Extend and customize the browser title --}}
+
 @section('title')
     {{ config('adminlte.title') }}
-    @hasSection('subtitle')
-        | @yield('subtitle')
-    @endif
-@endsection
+    @hasSection('subtitle') | @yield('subtitle') @endif
+@stop
 
-@section('content_top_nav_right')
-    @include('components.navbar.notification-bell')
-@endsection
+{{-- Extend and customize the page content header --}}
 
-{{-- Page header title and optional subtitle --}}
 @section('content_header')
     @hasSection('content_header_title')
         <h1 class="text-muted">
@@ -28,19 +22,16 @@
             @endif
         </h1>
     @endif
-@endsection
+@stop
 
+{{-- Rename section content to content_body --}}
 
-
-{{--  Main page content area --}}
 @section('content')
-    {{-- This div is required for Livewire root tag support --}}
-    <div>
-        @yield('content_body')
-    </div>
-@endsection
+    @yield('content_body')
+@stop
 
-{{-- Footer --}}
+{{-- Create a common footer --}}
+
 @section('footer')
     <div class="float-right">
         Version: {{ config('app.version', '1.0.0') }}
@@ -51,27 +42,34 @@
             {{ config('app.company_name', 'My company') }}
         </a>
     </strong>
-@endsection
+@stop
 
-{{-- Global JS --}}
+{{-- Add common Javascript/Jquery code --}}
+
 @push('js')
 <script>
-    // Add custom scripts here if needed
+
+    $(document).ready(function() {
+        // Add your common script logic here...
+    });
+
 </script>
 @endpush
 
-{{-- Global CSS --}}
+{{-- Add common CSS customizations --}}
+
 @push('css')
 <style type="text/css">
-    /* Example AdminLTE customization */
+
+    {{-- You can add AdminLTE customizations here --}}
     /*
     .card-header {
         border-bottom: none;
     }
-
     .card-title {
         font-weight: 600;
     }
     */
+
 </style>
 @endpush
