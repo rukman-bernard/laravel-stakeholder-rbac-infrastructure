@@ -36,20 +36,3 @@ command to run : crontab -l
 expected result : * * * * * cd /var/www/html && php artisan schedule:run >> /dev/null 2>&1
 
 
-CleanOldLoginAttempts command
-**************************************************
-1) Run it manually : php artisan cleanup:login-attempts
-2) Manually trigger shedule : php artisan schedule:run
-
-3) Tail the log
-command to run : docker exec -it laravel tail -f /var/www/html/storage/logs/scheduler.log
-
-4) Manually run the scheduler once
-command to run : docker exec -it laravel php artisan schedule:run
-
-5) Force job to run even if it’s not due, run it directly
-command to run : docker exec -it laravel php artisan cleanup:login-attempts
-
-6) How to start cron service
-command to run : service cron start
-

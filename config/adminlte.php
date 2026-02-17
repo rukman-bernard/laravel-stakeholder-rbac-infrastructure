@@ -361,7 +361,7 @@ return [
 
                 'text' => 'Dashboard',
                 'route'  => 'sysadmin.dashboard',
-                'icon'   => 'fas fa-tools',
+                'icon'   => 'fas fa-tachometer-alt',
                 // 'active' => ['sysadmin/*'],
                 'classes' => 'wire-navigate',
                 'can' => Permissions::VIEW_SYSTEM_ADMIN_DASHBOARD,
@@ -391,247 +391,247 @@ return [
             // ],
 
         // Admin Menu Items    
-        [
-            'header'=>'SUPER STUDENT ADMIN',
-            'can' => Permissions::VIEW_SUPER_ADMIN_MENU_HEADING,
+        // [
+        //     'header'=>'SUPER STUDENT ADMIN',
+        //     'can' => Permissions::VIEW_SUPER_ADMIN_MENU_HEADING,
         
-        ],
-        [
-            'header'=>'ADMIN',
-            'can' => 'admin-menu',
+        // ],
+        // [
+        //     'header'=>'ADMIN12',
+        //     'can' => 'admin-menu',
         
-        ],
-            [
-                'text'=>'Dashboard',
-                'route'=>'admin.dashboard',   
-                'icon' => 'fas fa-tachometer-alt',
-                'can' => Permissions::VIEW_ADMIN_DASHBOARD,
-            ],
+        // ],
+        //     [
+        //         'text'=>'Dashboard',
+        //         'route'=>'admin.dashboard',   
+        //         'icon' => 'fas fa-tachometer-alt',
+        //         'can' => Permissions::VIEW_ADMIN_DASHBOARD,
+        //     ],
             
             
            
-        [
-            'text' => 'University',
-            'icon' => 'fas fa-fw fa-share',
-            'submenu' => [
-                [
-                    'text' => 'Departments',
-                    'route' => 'admin.departments',
-                    'icon'  => 'fas fa-building',
-                    // 'can'   => \App\Constants\Permissions::VIEW_DEPARTMENTS,
-                    'can' => 'view admin dashboard',
-                ],
-            ],
-        ],
+        // [
+        //     'text' => 'University',
+        //     'icon' => 'fas fa-fw fa-share',
+        //     'submenu' => [
+        //         [
+        //             'text' => 'Departments',
+        //             'route' => 'admin.departments',
+        //             'icon'  => 'fas fa-building',
+        //             // 'can'   => \App\Constants\Permissions::VIEW_DEPARTMENTS,
+        //             'can' => 'view admin dashboard',
+        //         ],
+        //     ],
+        // ],
         
-        [
-            'text' => 'Programme Details',
-            'icon' => 'fas fa-fw fa-share',
-            'submenu' => [
+        // [
+        //     'text' => 'Programme Details',
+        //     'icon' => 'fas fa-fw fa-share',
+        //     'submenu' => [
                
-                [
-                    'text' => 'Levels',
-                    'route' => 'admin.levels',
-                    'icon'  => 'fas fa-layer-group',
-                    // 'can'   => \App\Constants\Permissions::VIEW_LEVELS,
-                    'can' => 'view admin dashboard',
+        //         [
+        //             'text' => 'Levels',
+        //             'route' => 'admin.levels',
+        //             'icon'  => 'fas fa-layer-group',
+        //             // 'can'   => \App\Constants\Permissions::VIEW_LEVELS,
+        //             'can' => 'view admin dashboard',
 
-                ],
-                 [
-                    'text' => 'Programmes',
-                    'route' => 'admin.programmes',
-                    'icon'  => 'fas fa-graduation-cap',
-                    // 'can'   => \App\Constants\Permissions::VIEW_PROGRAMMES,
-                    'can' => 'view admin dashboard',
+        //         ],
+        //          [
+        //             'text' => 'Programmes',
+        //             'route' => 'admin.programmes',
+        //             'icon'  => 'fas fa-graduation-cap',
+        //             // 'can'   => \App\Constants\Permissions::VIEW_PROGRAMMES,
+        //             'can' => 'view admin dashboard',
 
-                ],
-                [
-                    'text' => 'Modules',
-                    'route' => 'admin.modules',
-                    'icon'  => 'fas fa-puzzle-piece',
-                    // 'can'   => \App\Constants\Permissions::VIEW_MODULES,
-                    'can' => 'view admin dashboard',
+        //         ],
+        //         [
+        //             'text' => 'Modules',
+        //             'route' => 'admin.modules',
+        //             'icon'  => 'fas fa-puzzle-piece',
+        //             // 'can'   => \App\Constants\Permissions::VIEW_MODULES,
+        //             'can' => 'view admin dashboard',
 
-                ],
+        //         ],
 
-                [
-                    'text' => 'Practicals',
-                    'route' => 'admin.practicals',
-                    'icon'  => 'fas fa-vials',
-                    // 'can'   => \App\Constants\Permissions::VIEW_PRACTICALS,
-                    'can' => 'view admin dashboard',
+        //         [
+        //             'text' => 'Practicals',
+        //             'route' => 'admin.practicals',
+        //             'icon'  => 'fas fa-vials',
+        //             // 'can'   => \App\Constants\Permissions::VIEW_PRACTICALS,
+        //             'can' => 'view admin dashboard',
 
-                ],
-                [
-                    'text' => 'Theories',
-                    'route' => 'admin.theories',
-                    'icon'  => 'fas fa-book',
-                    // 'can'   => \App\Constants\Permissions::VIEW_THEORIES,
-                    'can' => 'view admin dashboard',
+        //         ],
+        //         [
+        //             'text' => 'Theories',
+        //             'route' => 'admin.theories',
+        //             'icon'  => 'fas fa-book',
+        //             // 'can'   => \App\Constants\Permissions::VIEW_THEORIES,
+        //             'can' => 'view admin dashboard',
 
-                ],
-                 [
-                    'text' => 'Skills',
-                    'route' => 'admin.skills',
-                    'icon'  => 'fas fa-tools',
-                    // 'can'   => \App\Constants\Permissions::VIEW_SKILLS,
-                    'can' => 'view admin dashboard',
+        //         ],
+        //          [
+        //             'text' => 'Skills',
+        //             'route' => 'admin.skills',
+        //             'icon'  => 'fas fa-tools',
+        //             // 'can'   => \App\Constants\Permissions::VIEW_SKILLS,
+        //             'can' => 'view admin dashboard',
 
-                ],
-                [
-                    'text' => 'Skill Categories',
-                    'route' => 'admin.skillcategories',
-                    'icon'  => 'fas fa-list-alt',
-                    // 'can'   => \App\Constants\Permissions::VIEW_SKILLCATEGORIES,
-                    'can' => 'view admin dashboard',
+        //         ],
+        //         [
+        //             'text' => 'Skill Categories',
+        //             'route' => 'admin.skillcategories',
+        //             'icon'  => 'fas fa-list-alt',
+        //             // 'can'   => \App\Constants\Permissions::VIEW_SKILLCATEGORIES,
+        //             'can' => 'view admin dashboard',
 
-                ],
-            ],
-        ],
-        [
-            'text' => 'Configs',
-            'icon' => 'fas fa-fw fa-share',
-            'submenu' => [
-                [
-                    'text' => 'Programme Configs',
-                    'route' => 'admin.configs',
-                    'icon'  => 'fas fa-cogs',
-                    // 'can'   => 'view configs', // OPTIONAL: if you use Spatie permission-based visibility
-                    'can' => 'view admin dashboard',
+        //         ],
+        //     ],
+        // ],
+        // [
+        //     'text' => 'Configs',
+        //     'icon' => 'fas fa-fw fa-share',
+        //     'submenu' => [
+        //         [
+        //             'text' => 'Programme Configs',
+        //             'route' => 'admin.configs',
+        //             'icon'  => 'fas fa-cogs',
+        //             // 'can'   => 'view configs', // OPTIONAL: if you use Spatie permission-based visibility
+        //             'can' => 'view admin dashboard',
 
-                ],
+        //         ],
                 
-            ],
-        ],
+        //     ],
+        // ],
 
-         [
-            'text' => 'Assignments',
-            'icon' => 'fas fa-fw fa-share',
-            'submenu' => [
-                [
-                    'text' => 'Config Modules Assignment',
-                    'url'  => 'admin/config-modules',
-                    'icon' => 'fas fa-puzzle-piece',
-                    'can' => 'view admin dashboard', // optional: use Spatie permission if applicable
-                ],
-                [
-                    'text' => 'Module Practicals Assignment',
-                    'route' => 'admin.practical-module-assignments',
-                    'icon'  => 'fas fa-vials',
-                    // 'can'   => \App\Constants\Permissions::VIEW_PRACTICALS,
-                    'can' => 'view admin dashboard',
+        //  [
+        //     'text' => 'Assignments',
+        //     'icon' => 'fas fa-fw fa-share',
+        //     'submenu' => [
+        //         [
+        //             'text' => 'Config Modules Assignment',
+        //             'url'  => 'admin/config-modules',
+        //             'icon' => 'fas fa-puzzle-piece',
+        //             'can' => 'view admin dashboard', // optional: use Spatie permission if applicable
+        //         ],
+        //         [
+        //             'text' => 'Module Practicals Assignment',
+        //             'route' => 'admin.practical-module-assignments',
+        //             'icon'  => 'fas fa-vials',
+        //             // 'can'   => \App\Constants\Permissions::VIEW_PRACTICALS,
+        //             'can' => 'view admin dashboard',
 
-                ],
-                 [
-                    'text' => 'Module Thoery Assignment',
-                    'route' => 'admin.module-theory-assignments',
-                    'icon'  => 'fas fa-vials',
-                    // 'can'   => \App\Constants\Permissions::VIEW_PRACTICALS,
-                    'can' => 'view admin dashboard',
+        //         ],
+        //          [
+        //             'text' => 'Module Thoery Assignment',
+        //             'route' => 'admin.module-theory-assignments',
+        //             'icon'  => 'fas fa-vials',
+        //             // 'can'   => \App\Constants\Permissions::VIEW_PRACTICALS,
+        //             'can' => 'view admin dashboard',
 
-                ],
-                [
-                    'text' => 'Module Skill Assignment',
-                    'route' => 'admin.module-skill-assigner',
-                    'icon' => 'fas fa-tools',
-                    'can'  => 'view admin dashboard', // optional: add permission if using Spatie
-                ],
-                 [
-                    'text' => 'Assign Students to Batches',
-                    'url'  => 'admin/assign-student-batch',
-                    'icon' => 'fas fa-user-plus',
-                    'can' => 'view admin dashboard', // Optional: use a Spatie permission
-                ],
-            ],
-        ],
+        //         ],
+        //         [
+        //             'text' => 'Module Skill Assignment',
+        //             'route' => 'admin.module-skill-assigner',
+        //             'icon' => 'fas fa-tools',
+        //             'can'  => 'view admin dashboard', // optional: add permission if using Spatie
+        //         ],
+        //          [
+        //             'text' => 'Assign Students to Batches',
+        //             'url'  => 'admin/assign-student-batch',
+        //             'icon' => 'fas fa-user-plus',
+        //             'can' => 'view admin dashboard', // Optional: use a Spatie permission
+        //         ],
+        //     ],
+        // ],
         
-        [
-            'text' => 'Semesters',
-            'icon' => 'fas fa-fw fa-share',
-            'submenu' => [
-                [
-                    'text' => 'Manage Semesters',
-                    'url'  => 'admin/semesters',
-                    'icon' => 'fas fa-calendar-alt',
-                    // 'can'  => 'view semesters', // optional, if using Spatie permissions
-                    'can' => 'view admin dashboard',
+        // [
+        //     'text' => 'Semesters',
+        //     'icon' => 'fas fa-fw fa-share',
+        //     'submenu' => [
+        //         [
+        //             'text' => 'Manage Semesters',
+        //             'url'  => 'admin/semesters',
+        //             'icon' => 'fas fa-calendar-alt',
+        //             // 'can'  => 'view semesters', // optional, if using Spatie permissions
+        //             'can' => 'view admin dashboard',
 
-                ],
+        //         ],
 
-                 [
-                    'text' => 'Module Semesters',
-                    'url' => 'admin/module-semester-assign',
-                    'icon' => 'fas fa-calendar-week',
-                    'can' => 'view admin dashboard',
+        //          [
+        //             'text' => 'Module Semesters',
+        //             'url' => 'admin/module-semester-assign',
+        //             'icon' => 'fas fa-calendar-week',
+        //             'can' => 'view admin dashboard',
 
-                ],
+        //         ],
 
-            ],
-        ],
+        //     ],
+        // ],
 
-        [
-            'text' => 'Awards',
-            'icon' => 'fas fa-fw fa-share',
-            'submenu' => [
-                [
-                    'text' => 'Exit Awards',
-                    'route' => 'admin.exit-awards',
-                    'icon' => 'fas fa-certificate',
-                    'can' => 'view admin dashboard', // Optional: Spatie permission check
-                ],
-                [
-                    'text' => 'Programme Exit Awards',
-                    'url'  => 'admin/programme-exit-awards',
-                    'icon' => 'fas fa-award',
-                    // 'can'  => 'view programme_exit_awards',
-                    'can' => 'view admin dashboard',
+        // [
+        //     'text' => 'Awards',
+        //     'icon' => 'fas fa-fw fa-share',
+        //     'submenu' => [
+        //         [
+        //             'text' => 'Exit Awards',
+        //             'route' => 'admin.exit-awards',
+        //             'icon' => 'fas fa-certificate',
+        //             'can' => 'view admin dashboard', // Optional: Spatie permission check
+        //         ],
+        //         [
+        //             'text' => 'Programme Exit Awards',
+        //             'url'  => 'admin/programme-exit-awards',
+        //             'icon' => 'fas fa-award',
+        //             // 'can'  => 'view programme_exit_awards',
+        //             'can' => 'view admin dashboard',
 
-                ],
-                [
-                    'text' => 'Student Exit Awards',
-                    'route' => 'admin.student-exit-awards',
-                    'icon' => 'fas fa-certificate',
-                    // 'can' => 'manage student e xit awards', // Adjust permission as needed
-                    'can' => 'view admin dashboard',
+        //         ],
+        //         [
+        //             'text' => 'Student Exit Awards',
+        //             'route' => 'admin.student-exit-awards',
+        //             'icon' => 'fas fa-certificate',
+        //             // 'can' => 'manage student e xit awards', // Adjust permission as needed
+        //             'can' => 'view admin dashboard',
 
-                ],
-            ],
-        ],
-        [
-            'text' => 'Students',
-            'icon' => 'fas fa-fw fa-share',
-            'submenu' => [
-                [
-                    'text' => 'Students',
-                    'route' => 'admin.students',
-                    'icon'  => 'fas fa-user-graduate',
-                    // 'can'   => 'view students', // Optional: Add a Spatie permission if using
-                    'can' => 'view admin dashboard',
+        //         ],
+        //     ],
+        // ],
+        // [
+        //     'text' => 'Students',
+        //     'icon' => 'fas fa-fw fa-share',
+        //     'submenu' => [
+        //         [
+        //             'text' => 'Students',
+        //             'route' => 'admin.students',
+        //             'icon'  => 'fas fa-user-graduate',
+        //             // 'can'   => 'view students', // Optional: Add a Spatie permission if using
+        //             'can' => 'view admin dashboard',
 
-                ],
-                [
-                    'text' => 'Batches',
-                    'route' => 'admin.batches',
-                    'icon'  => 'fas fa-users',
-                    // 'can'   => \App\Constants\Permissions::VIEW_BATCHES,
-                    'can' => 'view admin dashboard',
+        //         ],
+        //         [
+        //             'text' => 'Batches',
+        //             'route' => 'admin.batches',
+        //             'icon'  => 'fas fa-users',
+        //             // 'can'   => \App\Constants\Permissions::VIEW_BATCHES,
+        //             'can' => 'view admin dashboard',
 
-                ],
-            ],
-        ],
+        //         ],
+        //     ],
+        // ],
 
-        [
-            'text' => 'Tools',
-            'icon' => 'fas fa-fw fa-share',
-            'submenu' => [
-                [
-                    'text' => 'Copy Module Offerings',
-                    'route' => 'admin.module-offerings.copy',
-                    'icon' => 'fas fa-copy',
-                    'can' => 'view admin dashboard',
-                ],
-            ],
-        ],
+        // [
+        //     'text' => 'Tools',
+        //     'icon' => 'fas fa-fw fa-share',
+        //     'submenu' => [
+        //         [
+        //             'text' => 'Copy Module Offerings',
+        //             'route' => 'admin.module-offerings.copy',
+        //             'icon' => 'fas fa-copy',
+        //             'can' => 'view admin dashboard',
+        //         ],
+        //     ],
+        // ],
         
 
         // [

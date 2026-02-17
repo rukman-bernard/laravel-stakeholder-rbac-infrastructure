@@ -33,7 +33,6 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     ) ->withSchedule(function (Schedule $schedule) {
 
-        LoginAttemptCleanupScheduler::register($schedule);
 
     })->withMiddleware(function (Middleware $middleware) {
         
@@ -54,6 +53,6 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->withCommands([
-                \App\Console\Commands\CleanOldLoginAttempts::class, 
+
         ])
 ->create();
