@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Sysadmin\Misc;
+namespace App\Livewire\Sysadmin\Dashboard;
 
 use App\Constants\Permissions;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -24,6 +24,6 @@ class Dashboard extends Component
             abort(403, 'You do not have permission to view system admin dashboard.');
         }
 
-        return view('livewire.sysadmin.misc.dashboard');
+        return view('livewire.sysadmin.dashboard.dashboard');
     }
 }

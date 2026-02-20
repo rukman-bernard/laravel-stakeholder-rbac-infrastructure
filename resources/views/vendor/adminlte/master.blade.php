@@ -18,6 +18,13 @@
         @yield('title_postfix', config('adminlte.title_postfix', ''))
     </title>
 
+    {{-- IFrame Preloader Removal Workaround --}}
+    <!-- IFrame Preloader Removal Workaround -->
+    <style type="text/css">
+        body.iframe-mode .preloader {
+            display: none !important;
+        }
+    </style>
 
     {{-- Base Stylesheets (depends on Laravel asset bundling tool) --}} 
     @if(config('adminlte.enabled_laravel_mix', false))
@@ -131,8 +138,6 @@
     {{-- Custom Scripts --}}
     @yield('adminlte_js')
 
-    {{-- Pushed scripts from components (required for @push('scripts')) --}}
-    @stack('scripts')
 
 </body>
 

@@ -38,38 +38,23 @@
     </div>
 
     <strong>
-        <a href="{{ config('app.company_url', '#') }}">
-            {{ config('app.company_name', 'My company') }}
+        <a href="{{ config('app.url', '#') }}">
+            {{ config('app.name', 'My company') }}
         </a>
     </strong>
 @stop
 
-{{-- Add common Javascript/Jquery code --}}
+{{-- 
+    Asset Injection Policy:
 
-@push('js')
-<script>
+    This project standardises on:
+    - @section('adminlte_css')
+    - @section('adminlte_css_pre')
+    - @section('adminlte_js')
 
-    $(document).ready(function() {
-        // Add your common script logic here...
-    });
+    Blade stacks (@push('css') / @push('js')) are intentionally not used
+    to maintain a predictable asset-loading strategy.
 
-</script>
-@endpush
-
-{{-- Add common CSS customizations --}}
-
-@push('css')
-<style type="text/css">
-
-    {{-- You can add AdminLTE customizations here --}}
-    /*
-    .card-header {
-        border-bottom: none;
-    }
-    .card-title {
-        font-weight: 600;
-    }
-    */
-
-</style>
-@endpush
+    If stack-based extension is required in the future, refer to:
+    https://github.com/jeroennoten/Laravel-AdminLTE/blob/master/resources/views/master.blade.php
+--}}

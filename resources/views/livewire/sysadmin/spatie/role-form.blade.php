@@ -63,7 +63,7 @@
         </div>
     </div>
 
-    @push('scripts')
+    <!-- @push('scripts')
         <script>
           document.addEventListener('livewire:init', () => {
             Livewire.on('showModal', ({ modalId }) => {
@@ -77,6 +77,6 @@
             });
           });
         </script>
-    @endpush
+    @endpush -->
 
 </div>

@@ -18,7 +18,7 @@ Route::middleware(['auth:'. Guards::WEB, 'email.verified:'. Guards::WEB, 'role:'
 
 
         // Sysadmin Dashboard Route
-        Route::get('/dashboard', \App\Livewire\Sysadmin\Misc\Dashboard::class)->name('dashboard');
+        Route::get('/dashboard', \App\Livewire\Sysadmin\Dashboard\Dashboard::class)->name('dashboard');
  
         // Users Management
         Route::get('users', UserIndex::class)->name('users');

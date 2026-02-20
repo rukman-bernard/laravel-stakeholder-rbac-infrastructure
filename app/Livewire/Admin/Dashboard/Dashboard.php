@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Admin\Misc;
+namespace App\Livewire\Admin\Dashboard;
 
 use App\Constants\Permissions;
 use App\Models\Level;
@@ -8,7 +8,7 @@ use App\Models\Programme;
 use Illuminate\Auth\Access\AuthorizationException;
 use Livewire\Component;
 
-class DashboardManager extends Component
+class Dashboard extends Component
 {
     public string $header_title = 'Dashboard';
     public string $subtitle = '';
@@ -43,5 +43,5 @@ class DashboardManager extends Component
         //     abort(403, 'You do not have permission to view system admin dashboard.');
         // }
 
-        return view('livewire.admin.misc.dashboard');
+        return view('livewire.admin.dashboard.dashboard');
     }}

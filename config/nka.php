@@ -143,7 +143,10 @@ return [
             'web'      => '', // staff uses default AdminLTE styles
             'student'  => 'resources/scss/skins/student/student.scss',
             'employer' => 'resources/css/skins/employer.css',
-            'testuser' => 'resources/css/skins/testuser.css',
+        ],
+
+        'js'=> [
+            'web' => 'resources/js/web/misc.js',
         ],
 
         /*

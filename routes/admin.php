@@ -30,7 +30,7 @@ Route::middleware([
     | Admin Dashboard
     |--------------------------------------------------------------------------
     */
-    Route::get('/dashboard', \App\Livewire\Admin\Misc\DashboardManager::class)
+    Route::get('/dashboard', \App\Livewire\Admin\Dashboard\Dashboard::class)
         ->name('dashboard');
 
     /*
