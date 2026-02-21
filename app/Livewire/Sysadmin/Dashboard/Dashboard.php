@@ -20,8 +20,9 @@ class Dashboard extends Component
             $this->authorize(Permissions::VIEW_SYSTEM_ADMIN_DASHBOARD);
 
         } catch (AuthorizationException $e) {
-            //This action can be customized as required.
+
             abort(403, 'You do not have permission to view system admin dashboard.');
+            
         }
 
         return view('livewire.sysadmin.dashboard.dashboard');
