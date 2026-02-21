@@ -350,15 +350,7 @@ return [
             'can' => Permissions::VIEW_SYSTEM_ADMIN_MENU_HEADING,
         
         ],
-            [
 
-                'text' => 'Dashboard',
-                'route'  => 'sysadmin.dashboard',
-                'icon'   => 'fas fa-tachometer-alt',
-                // 'active' => ['sysadmin/*'],
-                'classes' => 'wire-navigate',
-                'can' => Permissions::VIEW_SYSTEM_ADMIN_DASHBOARD,
-            ],
             [
                 'text' => 'Users',
                 'route'  => 'sysadmin.users',
