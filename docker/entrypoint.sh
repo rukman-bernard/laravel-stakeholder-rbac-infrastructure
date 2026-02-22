@@ -1,21 +1,35 @@
 #!/bin/sh
-set -e
+set -eu
 
-# Print a clear marker that entrypoint executed (ASCII only)
-echo "[entrypoint] $(date '+%Y-%m-%d %H:%M:%S %z') - entrypoint.sh executed"
+APP_DIR="/var/www/html"
+ENV_FILE="$APP_DIR/.env"
+ENV_EXAMPLE="$APP_DIR/.env.example"
+AUTOLOAD="$APP_DIR/vendor/autoload.php"
+STORAGE_LINK="$APP_DIR/public/storage"
 
-cd /var/www/html
+log() {
+  # ASCII only, stable prefix for grep
+  echo "[entrypoint] $*"
+}
 
-echo "[entrypoint] Preparing Laravel runtime..."
+log "$(date '+%Y-%m-%d %H:%M:%S %z') - entrypoint.sh executed"
 
-# Ensure .env exists
-if [ ! -f ".env" ]; then
-  echo "[entrypoint] Creating .env from example..."
-  cp .env.example .env
+cd "$APP_DIR"
+
+log "Preparing Laravel runtime..."
+
+# ------------------------------------------------------------
+# Ensure .env exists (dev-friendly default)
+# ------------------------------------------------------------
+if [ ! -f "$ENV_FILE" ] && [ -f "$ENV_EXAMPLE" ]; then
+  log "Creating .env from .env.example..."
+  cp "$ENV_EXAMPLE" "$ENV_FILE"
 fi
 
-# Ensure runtime directories exist (BEFORE composer ever runs)
-echo "[entrypoint] Ensuring runtime directories exist..."
+# ------------------------------------------------------------
+# Ensure runtime directories exist BEFORE any artisan usage
+# ------------------------------------------------------------
+log "Ensuring runtime directories exist..."
 mkdir -p \
   storage/logs \
   storage/framework/cache \
@@ -23,26 +37,42 @@ mkdir -p \
   storage/framework/views \
   bootstrap/cache
 
-# Ensure writable bits
-chmod -R ug+rwX storage bootstrap/cache || true
+# ------------------------------------------------------------
+# Best-effort permissions (bind mounts may limit chmod)
+# ------------------------------------------------------------
+log "Ensuring runtime directories are writable (best-effort)..."
+chmod -R ug+rwX storage bootstrap/cache 2>/dev/null || true
 
-# If dependencies missing, stop here (do NOT start artisan yet)
-if [ ! -f "vendor/autoload.php" ]; then
-  echo "[entrypoint] Dependencies missing."
-  echo "[entrypoint] Run: docker compose exec laravel composer install"
+# ------------------------------------------------------------
+# If dependencies are missing, do not run artisan.
+# Keep PHP-FPM running so the container is usable.
+# ------------------------------------------------------------
+if [ ! -f "$AUTOLOAD" ]; then
+  log "Dependencies missing (vendor/ not installed)."
+  log "Run: docker compose exec laravel composer install"
+  log "Starting PHP-FPM anyway..."
   exec php-fpm
 fi
 
-# Generate key if needed
-if ! grep -q "APP_KEY=base64:" .env 2>/dev/null; then
-  echo "[entrypoint] Generating Laravel APP_KEY..."
-  php artisan key:generate --force
+# ------------------------------------------------------------
+# Generate APP_KEY if missing (safe only when artisan is available)
+# ------------------------------------------------------------
+if [ -f "$ENV_FILE" ]; then
+  if ! grep -q '^APP_KEY=base64:' "$ENV_FILE" 2>/dev/null; then
+    log "Generating Laravel APP_KEY..."
+    php artisan key:generate --force
+  fi
+else
+  log "WARNING: .env not found. Skipping APP_KEY generation."
 fi
 
-# Create storage link
-if [ ! -L "public/storage" ]; then
-  php artisan storage:link || true
+# ------------------------------------------------------------
+# Storage symlink (idempotent)
+# ------------------------------------------------------------
+if [ ! -L "$STORAGE_LINK" ]; then
+  log "Creating storage symlink (public/storage)..."
+  php artisan storage:link >/dev/null 2>&1 || true
 fi
 
-echo "[entrypoint] Starting PHP-FPM..."
+log "Starting PHP-FPM..."
 exec php-fpm

@@ -2,87 +2,109 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
+use App\Notifications\StudentResetPasswordNotification;
+use App\Traits\AdminLteUserInterface;
+use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
+use Illuminate\Auth\Passwords\CanResetPassword as CanResetPasswordTrait;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-
-// use the correct trait
-use Illuminate\Auth\Passwords\CanResetPassword as CanResetPasswordTrait;
-
-
-
-
-//Traits
-use App\Traits\FlushesCacheByTags;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Notifications\Notifiable; 
-// use App\Traits\SendsCustomPasswordResetNotification;
-use App\Traits\AdminLteUserInterface;
-use App\Notifications\StudentResetPasswordNotification;
-use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
-
-
-class Student extends Authenticatable implements CanResetPassword,MustVerifyEmail
+class Student extends Authenticatable implements CanResetPassword, MustVerifyEmail
 {
-    // use HasFactory,FlushesCacheByTags, Notifiable,SendsCustomPasswordResetNotification,AdminLteUserInterface;
-    use HasFactory,FlushesCacheByTags, Notifiable,AdminLteUserInterface, CanResetPasswordTrait, MustVerifyEmailTrait;
+    use HasFactory;
+    use Notifiable;
+    use AdminLteUserInterface;
+    use CanResetPasswordTrait;
+    use MustVerifyEmailTrait;
 
-    protected $fillable = ['name', 'email', 'phone', 'dob', 'password'];
+    /*
+    |--------------------------------------------------------------------------
+    | Mass Assignment
+    |--------------------------------------------------------------------------
+    */
 
-    // public function programme()
-    // {
-    //     return $this->belongsTo(Programme::class);
-    // }
+    protected $fillable = [
+        'name',
+        'email',
+        'phone',
+        'dob',
+        'password',
+        'image_path',
+    ];
 
+    /*
+    |--------------------------------------------------------------------------
+    | Hidden Attributes
+    |--------------------------------------------------------------------------
+    */
 
-    public function batches()
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Attribute Casting
+    |--------------------------------------------------------------------------
+    */
+
+    protected function casts(): array
     {
-        return $this->belongsToMany(Batch::class)->withPivot('status')->withTimestamps();
+        return [
+            'dob' => 'date',
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed', // ✅ auto-hash on set()
+        ];
     }
 
-    public function activeBatch()
-    {
-        return $this->batches()->wherePivot('status', 'active');
-    }
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
 
-    public function address()
-    {
-        return $this->morphOne(Address::class, 'addressable');
-    }
-
-    // Add this method in Student model
-    public function activeBatchAssignment()
-    {
-        return $this->hasOne(BatchStudent::class)
-            ->where('status', 'active')
-            ->with('batch.programme'); // preload batch + programme if needed
-    }
-
+    /**
+     * Canonical profile image URL for UI usage.
+     *
+     * Uses the public disk URL (expects Laravel storage symlink: public/storage).
+     */
     public function getProfileImageUrlAttribute(): string
     {
-        return $this->image_path && Storage::disk('public')->exists($this->image_path)
-            ? asset('storage/' . $this->image_path)
-            : asset('images/default-avatar.png');
+        $fallback = asset('images/default-avatar.png');
+
+        if (! $this->image_path) {
+            return $fallback;
+        }
+
+        return Storage::disk('public')->exists($this->image_path)
+            ? Storage::disk('public')->url($this->image_path)
+            : $fallback;
     }
 
-    public static function cachedOrdered()
-    {
-        return Cache::tags(['student'])->remember(
-            'all_students_ordered_by_name',
-            config('nka.cacheTTL.short_term'),
-            fn () => static::orderBy('name')->get()
-        );
-    }
+    /*
+    |--------------------------------------------------------------------------
+    | Notifications
+    |--------------------------------------------------------------------------
+    */
 
-    public function sendPasswordResetNotification($token)
+    public function sendPasswordResetNotification($token): void
     {
         $this->notify(new StudentResetPasswordNotification($token));
     }
 
-    public function authGuardName(): string { return 'student'; }
+    /*
+    |--------------------------------------------------------------------------
+    | Guard
+    |--------------------------------------------------------------------------
+    */
 
-
+    public function authGuardName(): string
+    {
+        return 'student';
+    }
 }

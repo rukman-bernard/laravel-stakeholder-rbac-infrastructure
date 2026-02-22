@@ -2,58 +2,92 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Contracts\Auth\CanResetPassword;
 use App\Notifications\EmployerResetPasswordNotification;
-
-
-
-//Traits
-use App\Traits\FlushesCacheByTags;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Notifications\Notifiable; 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Traits\AdminLteUserInterface;
+use Illuminate\Auth\Passwords\CanResetPassword as CanResetPasswordTrait;
+use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
+use Illuminate\Contracts\Auth\CanResetPassword;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
-
-class Employer extends Authenticatable implements CanResetPassword,MustVerifyEmail
+class Employer extends Authenticatable implements CanResetPassword, MustVerifyEmail
 {
-    use HasFactory,FlushesCacheByTags, Notifiable,AdminLteUserInterface;
+    use HasFactory;
+    use Notifiable;
+    use AdminLteUserInterface;
+    use CanResetPasswordTrait;
+    use MustVerifyEmailTrait;
 
-    protected $fillable = ['name', 'email', 'phone', 'password'];
+    /**
+     * Mass assignable attributes.
+     *
+     * NOTE: include image_path if you support profile photos for employers.
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'phone',
+        'password',
+        'image_path',
+    ];
 
+    /**
+     * Hide sensitive fields from serialization.
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
-    public function getProfileImageUrlAttribute(): string
+    /**
+     * Casts.
+     */
+    protected function casts(): array
     {
-        return $this->image_path && Storage::disk('public')->exists($this->image_path)
-            ? asset('storage/' . $this->image_path)
-            : asset('images/default-avatar.png');
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
     }
 
-    public static function cachedOrdered()
-    {
-        return Cache::tags(['employer'])->remember(
-            'all_employers_ordered_by_name',
-            config('nka.cacheTTL.short_term'),
-            fn () => static::orderBy('name')->get()
-        );
-    }
-
+    /**
+     * Polymorphic address relationship.
+     */
     public function address()
     {
         return $this->morphOne(Address::class, 'addressable');
     }
 
+    /**
+     * Computed profile image URL for AdminLTE + profile views.
+     *
+     * Uses public disk + /storage symlink.
+     */
+    public function getProfileImageUrlAttribute(): string
+    {
+        if ($this->image_path && Storage::disk('public')->exists($this->image_path)) {
+            return asset('storage/' . $this->image_path);
+        }
 
-    public function sendPasswordResetNotification($token)
+        return asset('images/default-avatar.png');
+    }
+
+    /**
+     * Send password reset using the employer notification.
+     */
+    public function sendPasswordResetNotification($token): void
     {
         $this->notify(new EmployerResetPasswordNotification($token));
     }
 
-    public function authGuardName(): string { return 'employer'; }
-
-
-
+    /**
+     * Used by your guard-aware UI/helpers.
+     */
+    public function authGuardName(): string
+    {
+        return 'employer';
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Livewire\Shared;
 
 use App\Services\Auth\GuardResolver;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class UserProfile extends Component
@@ -15,15 +16,28 @@ class UserProfile extends Component
 
     public function mount(GuardResolver $guardResolver): void
     {
-        ['guard' => $guard, 'user' => $user] = $guardResolver->identity();
-
-        // If unauthenticated, keep guard default and leave fields empty (or redirect if you prefer)
+        ['guard' => $guard] = $guardResolver->identity();
         $this->guard = $guard ?? $this->guard;
+
+        $this->loadUser();
+    }
+
+    private function loadUser(): void
+    {
+        $user = Auth::guard($this->guard)->user();
 
         $this->name = $user?->name ?? '';
         $this->email = $user?->email ?? '';
+
+        // ✅ Use accessor (works for both User + Student consistently)
         $this->profile_image_url = $user?->profile_image_url
             ?? asset('images/default-avatar.png');
+    }
+
+    #[On('profile-photo-updated')]
+    public function refreshAfterPhotoUpload(): void
+    {
+        $this->loadUser();
     }
 
     public function updateProfile(): void
@@ -31,7 +45,6 @@ class UserProfile extends Component
         $user = Auth::guard($this->guard)->user();
 
         if (! $user) {
-            // If someone hits the action after session expiry
             $this->addError('auth', 'Your session has expired. Please sign in again.');
             return;
         }
@@ -45,6 +58,9 @@ class UserProfile extends Component
             'name' => $this->name,
             'email' => $this->email,
         ]);
+
+        // Reload so UI always reflects DB source-of-truth
+        $this->loadUser();
 
         session()->flash('success', 'Profile updated successfully.');
     }

@@ -47,7 +47,7 @@ trait AdminLteUserInterface
 
     public function adminlte_image(): string
     {
-        return asset($this->getProfileImageUrlAttribute());
+        return $this->profile_image_url;
     }
 
     /**

@@ -2,32 +2,32 @@
 
 namespace App\Models;
 
-use App\Constants\Roles;
+use App\Traits\AdminLteUserInterface;
+use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
+use Illuminate\Auth\Passwords\CanResetPassword as CanResetPasswordTrait;
+use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Traits\HasRoles;
 
-
-//Traits
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Traits\AdminLteUserInterface;
-
-//Reset Password
-use Illuminate\Contracts\Auth\CanResetPassword;
-use Illuminate\Auth\Passwords\CanResetPassword as CanResetPasswordTrait;
-
-class User extends Authenticatable implements CanResetPassword,MustVerifyEmail
+class User extends Authenticatable implements CanResetPassword, MustVerifyEmail
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles, CanResetPasswordTrait, AdminLteUserInterface;
+    use HasFactory;
+    use Notifiable;
+    use HasRoles;
+    use AdminLteUserInterface;
+    use CanResetPasswordTrait;
+    use MustVerifyEmailTrait;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Mass Assignment
+    |--------------------------------------------------------------------------
+    */
+
     protected $fillable = [
         'name',
         'email',
@@ -35,21 +35,23 @@ class User extends Authenticatable implements CanResetPassword,MustVerifyEmail
         'image_path',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Hidden Attributes
+    |--------------------------------------------------------------------------
+    */
+
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Attribute Casting
+    |--------------------------------------------------------------------------
+    */
+
     protected function casts(): array
     {
         return [
@@ -58,40 +60,49 @@ class User extends Authenticatable implements CanResetPassword,MustVerifyEmail
         ];
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
     public function address()
     {
         return $this->morphOne(Address::class, 'addressable');
     }
-    
+
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Canonical profile image URL for UI usage.
+     *
+     * Uses the public disk URL (expects Laravel storage symlink: public/storage).
+     */
     public function getProfileImageUrlAttribute(): string
     {
-        return $this->image_path && Storage::disk('public')->exists($this->image_path)
-            ? asset('storage/' . $this->image_path)
-            : asset('images/default-avatar.png');
+        $fallback = asset('images/default-avatar.png');
+
+        if (! $this->image_path) {
+            return $fallback;
+        }
+
+        return Storage::disk('public')->exists($this->image_path)
+            ? Storage::disk('public')->url($this->image_path)
+            : $fallback;
     }
 
-    public function authGuardName(): string { return 'web'; }
+    /*
+    |--------------------------------------------------------------------------
+    | Guard
+    |--------------------------------------------------------------------------
+    */
 
-
-    // public function getPrimaryRoleName(): ?string
-    // {
-    //     return $this->roles->first()?->name;
-    // }
-
-
-    // public function adminlte_profile_url()
-    // {
-    //     return route('profile'); 
-    // }
-
-    // public function adminlte_image()
-    // {
-    //     return asset($this->getProfileImageUrlAttribute()); 
-    // }
-
-    // public function adminlte_desc()
-    // {
-    //     return ucfirst(Roles::label($this->getPrimaryRoleName()) ?? 'User');
-    // }
-    
+    public function authGuardName(): string
+    {
+        return 'web';
+    }
 }

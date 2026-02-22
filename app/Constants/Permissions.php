@@ -3,16 +3,18 @@
 namespace App\Constants;
 
 /**
- * Permissions (Spatie)
+ * Spatie Permission Constants
  *
- * IMPORTANT:
- * - Do NOT change permission string values unless you also migrate existing DB records.
- * - Some values contain legacy typos (e.g., "assgin"). These are kept as-is for compatibility.
- *
- * This class is intentionally "constants-only" and should not be extended.
+ * Keep permission string values stable.
+ * If you change a value, you must also update existing DB records.
  */
 final class Permissions
 {
+    private function __construct()
+    {
+        // constants-only
+    }
+
     // =====================================================================
     // SYSADMIN (System Admin)
     // =====================================================================
@@ -41,109 +43,32 @@ final class Permissions
     public const EDIT_PERMISSIONS   = 'edit permissions';
     public const DELETE_PERMISSIONS = 'delete permissions';
 
-    // =====================================================================
-    // NKA STAFF (Academic/Admin back-office)
-    // =====================================================================
-
-    // Dashboard
-    public const VIEW_ADMIN_DASHBOARD = 'view admin dashboard';
-
-    // Departments
-    public const VIEW_DEPARTMENTS   = 'view departments';
-    public const CREATE_DEPARTMENTS = 'create departments';
-    public const EDIT_DEPARTMENTS   = 'edit departments';
-    public const DELETE_DEPARTMENTS = 'delete departments';
-
-    // Programmes
-    public const VIEW_PROGRAMMES                 = 'view programmes';
-    public const CREATE_PROGRAMMES               = 'create programmes';
-    public const EDIT_PROGRAMMES                 = 'edit programmes';
-    public const DELETE_PROGRAMMES               = 'delete programmes';
-    public const VIEW_STUDENTS_IN_PROGRAMMES     = 'view students in programmes';
-    public const ASSIGN_STUDENTS_TO_PROGRAMMES   = 'assign students to programmes';
-    public const REMOVE_STUDENTS_FROM_PROGRAMMES = 'remove students from programmes';
-
-    // Levels
-    public const VIEW_LEVELS             = 'view levels';
-    public const CREATE_LEVELS           = 'create levels';
-    public const EDIT_LEVELS             = 'edit levels';
-    public const DELETE_LEVELS           = 'delete levels';
-    public const VIEW_STUDENTS_IN_LEVELS = 'view students in levels';
-
     /**
-     * Legacy value contains a typo ("assgin") — keep as-is.
+     * Single source of truth for "all permissions currently used by seeders".
+     * Your seeders should call this instead of duplicating arrays.
+     *
+     * @return array<int, string>
      */
-    public const ASSIGN_STUDENTS_TO_LEVELS   = 'assgin students to levels';
-    public const REMOVE_STUDENTS_FROM_LEVELS = 'remove students from levels';
+    public static function all(): array
+    {
+        return [
+            self::VIEW_SYSTEM_ADMIN_MENU_HEADING,
+            self::VIEW_SYSTEM_ADMIN_DASHBOARD,
 
-    // Modules
-    public const VIEW_MODULES   = 'view modules';
-    public const CREATE_MODULES = 'create modules';
-    public const EDIT_MODULES   = 'edit modules';
-    public const DELETE_MODULES = 'delete modules';
+            self::VIEW_USERS,
+            self::CREATE_USERS,
+            self::EDIT_USERS,
+            self::DELETE_USERS,
 
-    public const VIEW_STUDENTS_IN_MODULES = 'view students in modules';
+            self::VIEW_ROLES,
+            self::CREATE_ROLES,
+            self::EDIT_ROLES,
+            self::DELETE_ROLES,
 
-    /**
-     * Legacy value contains a typo ("assgin") — keep as-is.
-     */
-    public const ASSIGN_STUDENTS_TO_MODULES   = 'assgin students to modules';
-    public const REMOVE_STUDENTS_FROM_MODULES = 'remove students from modules';
-
-    // Module assignment (batch-level)
-    public const ASSIGN_MODULES_TO_BATCHES = 'assign modules to batches';
-
-    // Batches
-    public const VIEW_BATCHES   = 'view batches';
-    public const CREATE_BATCHES = 'create batches';
-    public const EDIT_BATCHES   = 'edit batches';
-    public const DELETE_BATCHES = 'delete batches';
-
-    // Practicals
-    public const VIEW_PRACTICALS   = 'view practicals';
-    public const CREATE_PRACTICALS = 'create practicals';
-    public const EDIT_PRACTICALS   = 'edit practicals';
-    public const DELETE_PRACTICALS = 'delete practicals';
-
-    // Theories
-    public const VIEW_THEORIES   = 'view theories';
-    public const CREATE_THEORIES = 'create theories';
-    public const EDIT_THEORIES   = 'edit theories';
-    public const DELETE_THEORIES = 'delete theories';
-
-    // Skills
-    public const VIEW_SKILLS   = 'view skills';
-    public const CREATE_SKILLS = 'create skills';
-    public const EDIT_SKILLS   = 'edit skills';
-    public const DELETE_SKILLS = 'delete skills';
-
-    // Skill Categories
-    public const VIEW_SKILLCATEGORIES   = 'view skillcategories';
-    public const CREATE_SKILLCATEGORIES = 'create skillcategories';
-    public const EDIT_SKILLCATEGORIES   = 'edit skillcategories';
-    public const DELETE_SKILLCATEGORIES = 'delete skillcategories';
-
-    // Students (management)
-    public const VIEW_STUDENTS = 'view students';
-
-    // Configs
-    public const VIEW_CONFIGS   = 'view configs';
-    public const MANAGE_CONFIGS = 'manage configs';
-
-    // =====================================================================
-    // MENU HEADINGS (visibility control)
-    // =====================================================================
-
-    public const VIEW_SUPER_ADMIN_MENU_HEADING = 'view superadmin menu heading';
-
-    /**
-     * Note: current value is "view admin menu" (not "...heading").
-     * Keep as-is to avoid breaking existing assignments.
-     */
-    public const VIEW_ADMIN_MENU_HEADING = 'view admin menu';
-
-    // =====================================================================
-    // Future permissions (kept as comments for now)
-    // =====================================================================
-    // Keep these commented items if you still want them as a roadmap.
+            self::VIEW_PERMISSIONS,
+            self::CREATE_PERMISSIONS,
+            self::EDIT_PERMISSIONS,
+            self::DELETE_PERMISSIONS,
+        ];
+    }
 }

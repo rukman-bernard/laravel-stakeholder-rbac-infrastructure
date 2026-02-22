@@ -23,6 +23,13 @@ return new class extends Migration
             $table->date('dob')->nullable();
             $table->timestamps();
         });
+
+        Schema::create('student_password_reset_tokens', function (Blueprint $table) {
+            $table->string('email')->primary();
+            $table->string('token');
+            $table->timestamp('created_at')->nullable();
+        });
+
     }
     
 
@@ -32,5 +39,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('students');
+        Schema::dropIfExists('student_password_reset_tokens');
+
     }
 };

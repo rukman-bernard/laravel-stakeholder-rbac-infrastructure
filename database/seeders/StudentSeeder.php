@@ -27,17 +27,5 @@ class StudentSeeder extends Seeder
                 'dob' => '2000-01-01',
             ]
         );
-
-        /**
-         * 2) Dummy students (bounded growth)
-         * Only create more if total count is below a sensible threshold.
-         * Adjust the threshold to match your project expectations.
-         */
-        $minTotal = 21; // 1 named + 20 factory
-        $current = Student::count();
-
-        if ($current < $minTotal) {
-            Student::factory()->count($minTotal - $current)->create();
-        }
     }
 }

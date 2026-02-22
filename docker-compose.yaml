@@ -35,6 +35,8 @@ services:
 
   laravel:
     user: "1000:1000"
+    environment:
+      HOME: /tmp
     build:
       context: .
       dockerfile: Dockerfile

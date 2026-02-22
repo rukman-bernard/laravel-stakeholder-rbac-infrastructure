@@ -27,11 +27,6 @@ class UserSeeder extends Seeder
                 'email' => 'admin@gmail.com',
                 'role' => Roles::ADMIN,
             ],
-            [
-                'name' => 'Test User',
-                'email' => 'test@example.com',
-                'role' => null,
-            ],
         ];
 
         foreach ($namedUsers as $userData) {
@@ -58,12 +53,5 @@ class UserSeeder extends Seeder
             }
         }
 
-        /**
-         * Random users (only create if none exist)
-         * Prevent infinite growth on repeated seeding
-         */
-        if (User::count() < 20) {
-            User::factory(10)->create();
-        }
     }
 }

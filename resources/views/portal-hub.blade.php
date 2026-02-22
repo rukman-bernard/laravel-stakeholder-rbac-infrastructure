@@ -54,7 +54,7 @@
             {{-- student image and button --}}
             <div
                 class="overflow-hidden sm:h-[410px] basis-1/4 max-w-sm bg-gradient-to-r from-yellow-600 to-red-600 border border-gray-200 rounded-3xl shadow-xl dark:bg-gray-800 dark:border-gray-700">
-                <img class="rounded-t-3xl w-full" src="{{ asset('images/student.jpg') }}" alt="" />
+                <img class="rounded-t-3xl w-full" src="{{ asset('images/app/portal-hub/sections/student.jpg') }}" alt="" />
                 <div class="p-5">
                     <div class="flex justify-end">
                         <a href="{{ route('student.login') }}"
@@ -69,7 +69,7 @@
             {{-- admin image and button --}}
             <div
                 class="overflow-hidden sm:h-[410px] basis-1/4 max-w-sm bg-gradient-to-r from-green-600 to-yellow-600 border border-gray-200 rounded-3xl shadow-xl dark:bg-gray-800 dark:border-gray-700">
-                <img class="rounded-t-3xl w-full" src="{{ asset('images/admin.jpg') }}" alt="" />
+                <img class="rounded-t-3xl w-full" src="{{ asset('images/app/portal-hub/sections/admin.jpg') }}" alt="" />
                 <div class="p-5">
                     <div class="flex justify-end">
                         <a href="{{ route('login') }}"
@@ -84,7 +84,7 @@
             {{-- Skill Employer card --}}
             <div
                 class="overflow-hidden sm:h-[410px] basis-1/4 max-w-sm bg-gradient-to-r from-red-600 to-yellow-600 border border-gray-200 rounded-3xl shadow-xl dark:bg-gray-800 dark:border-gray-700">
-                <img class="rounded-t-3xl w-full" src="{{ asset('images/employer.jpg') }}" alt="" />
+                <img class="rounded-t-3xl w-full" src="{{ asset('images/app/portal-hub/sections/employer.jpg') }}" alt="" />
                 <div class="p-5">
                     <div class="flex justify-end">
                         <a href="{{ route('employer.login') }}"
@@ -99,7 +99,7 @@
             {{-- university picture --}}
             <div
                 class="overflow-hidden sm:h-[410px] basis-1/4 max-w-sm bg-gradient-to-r from-red-600 to-green-600 border border-gray-200 rounded-3xl shadow-xl dark:bg-gray-800 dark:border-gray-700">
-                <img class="rounded-t-3xl w-full" src="{{ asset('images/university.jpg') }}" alt="" />
+                <img class="rounded-t-3xl w-full" src="{{ asset('images/app/portal-hub/sections/university.jpg') }}" alt="" />
                 <div class="p-5">
                     <div class="flex justify-end">
                         <a href="#"
@@ -121,7 +121,7 @@
                     <div class="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
                     <div class="relative bg-gradient-to-r from-red-600 to-green-600 ring-1 ring-gray-900/5 rounded-full leading-none flex items-top justify-start space-x-6">
                         <div class="flex items-center">
-                            <img class="rounded-full h-24 mr-2" src="{{ asset('images/student-01.jpg') }}" alt="">
+                            <img class="rounded-full h-24 mr-2" src="{{ asset('images/app/portal-hub/proofs/student-01.jpg') }}" alt="">
                             <div class="flex flex-col">
                                 <h3 class="font-bold">Ms. Ann Livera</h3>
                                 <p class="font-semibold text-slate-800 mr-2">Simplified skill tracking and powerful resources—Skill Tool is a game-changer for every student!</p>
@@ -135,7 +135,7 @@
                     <div class="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
                     <div class="relative bg-gradient-to-r from-red-600 to-yellow-600 ring-1 ring-gray-900/5 rounded-full leading-none flex items-top justify-start space-x-6">
                         <div class="flex items-center">
-                            <img class="rounded-full h-24 mr-2" src="{{ asset('images/student-02.jpg') }}" alt="">
+                            <img class="rounded-full h-24 mr-2" src="{{ asset('images/app/portal-hub/proofs/student-02.jpg') }}" alt="">
                             <div class="flex flex-col">
                                 <h3 class="font-bold">Mr. Tony Brown</h3>
                                 <p class="font-semibold text-slate-800 mr-2">Easy to use, rich in features. Skill Tool makes student development simple and impactful.</p>
@@ -149,7 +149,7 @@
                     <div class="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
                     <div class="relative bg-gradient-to-r from-green-600 to-yellow-600 ring-1 ring-gray-900/5 rounded-full leading-none flex items-top justify-start space-x-6">
                         <div class="flex items-center">
-                            <img class="rounded-full h-24 mr-2" src="{{ asset('images/student-03.jpg') }}" alt="">
+                            <img class="rounded-full h-24 mr-2" src="{{ asset('images/app/portal-hub/proofs/student-03.jpg') }}" alt="">
                             <div class="flex flex-col">
                                 <h3 class="font-bold">Mr. Lean Witerbrow</h3>
                                 <p class="font-semibold text-slate-800 mr-2">Seamless, smart, essential. Skill Tool is a must-have for every learner chasing excellence.</p>

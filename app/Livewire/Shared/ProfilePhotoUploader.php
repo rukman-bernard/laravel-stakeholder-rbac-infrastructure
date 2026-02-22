@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Shared;
 
+use App\Services\Auth\GuardResolver;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\File;
@@ -12,36 +13,43 @@ class ProfilePhotoUploader extends Component
 {
     use WithFileUploads;
 
-    public $photo;
+    public $photo = null;
     public string $guard = 'web';
 
-    public function mount()
+    public function mount(GuardResolver $guardResolver): void
     {
-        $guardResolver = app(\App\Services\Auth\GuardResolver::class);
-        $this->guard = $guardResolver->detect();
+        $this->guard = $guardResolver->detect() ?? 'web';
     }
 
-    public function photoUpload()
+    public function photoUpload(): void
     {
         $this->validate([
-            'photo' => [
-                'required',
-                File::image()->max(1024), // Max 1MB
-            ],
+            'photo' => ['required', File::image()->max(1024)],
         ]);
 
         $user = Auth::guard($this->guard)->user();
 
-        // Optional: delete old image
+        if (! $user) {
+            $this->addError('auth', 'Your session has expired. Please sign in again.');
+            return;
+        }
+
+        // Delete old image if exists
         if ($user->image_path && Storage::disk('public')->exists($user->image_path)) {
             Storage::disk('public')->delete($user->image_path);
         }
 
-        // Save new photo
+        // Store new image (storage/app/public/avatars)
         $path = $this->photo->store('avatars', 'public');
 
-        $user->image_path = $path;
-        $user->save();
+        // Persist
+        $user->forceFill(['image_path' => $path])->save();
+
+        // Reset the upload input + preview
+        $this->reset('photo');
+
+        // Tell profile component to refresh image without full reload (optional UX improvement)
+        $this->dispatch('profile-photo-updated');
 
         session()->flash('success', 'Profile photo updated!');
     }

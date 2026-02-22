@@ -3,71 +3,62 @@
 namespace App\Constants;
 
 /**
- * Roles
- * =====
+ * Roles (Spatie)
+ * --------------
+ * Single source of truth for role keys used in:
+ * - seeders
+ * - authorization checks
+ * - UI labels (AdminLTE user menu, badges, logs)
  *
- * Centralised definition of **authorisation role keys** used by the system.
- *
- * Purpose
- * -------
- * - Provide a single source of truth for Spatie role names
- * - Prevent string duplication across policies, middleware, controllers, and UI
- * - Provide human-readable labels for display (AdminLTE user menu, badges, logs)
- *
- * Design Notes
- * ------------
- * - Roles are authorisation only (RBAC). They are not guards.
- * - This class must remain framework-agnostic (no model/service references).
- * - Keep keys aligned with your Spatie `roles` table values.
+ * Notes:
+ * - Role names must match values stored in the `roles` table.
+ * - Roles are NOT guards (guards are defined in auth.php).
+ * - Keep string values stable unless you also migrate existing DB rows.
  */
 final class Roles
 {
-    /** Web-guard roles (staff users) */
+    // =====================================================================
+    // Web-guard roles (staff)
+    // =====================================================================
+
     public const SYSTEM_ADMIN = 'sysadmin';
     public const SUPER_ADMIN  = 'superadmin';
     public const ADMIN        = 'admin';
 
     /**
-     * Role labels used for UI display.
-     * Keep labels stable for a consistent UX.
+     * Canonical registry of roles and UI labels.
+     * Keep this as the single authoritative map to avoid duplication.
+     *
+     * @var array<string, string>
      */
-    private const LABELS = [
+    private const REGISTRY = [
         self::SYSTEM_ADMIN => 'System Administrator',
         self::SUPER_ADMIN  => 'Super Admin',
         self::ADMIN        => 'Admin',
     ];
 
     /**
-     * Get all known role keys.
-     *
-     * Useful for:
-     * - validation (`in:`)
-     * - seeding
-     * - deterministic ordering / priority lists
+     * Get all role keys in deterministic order.
      *
      * @return array<int, string>
      */
     public static function all(): array
     {
-        return [
-            self::SYSTEM_ADMIN,
-            self::SUPER_ADMIN,
-            self::ADMIN,
-        ];
+        return array_keys(self::REGISTRY);
     }
 
     /**
-     * Get all human-readable labels keyed by role name.
+     * Get all labels keyed by role key.
      *
      * @return array<string, string>
      */
     public static function labels(): array
     {
-        return self::LABELS;
+        return self::REGISTRY;
     }
 
     /**
-     * Resolve a human-readable label for a role key.
+     * Resolve a UI label for a role key.
      * Falls back to a safe title-cased string for unknown roles.
      */
     public static function label(?string $role): string
@@ -78,23 +69,21 @@ final class Roles
             return 'User';
         }
 
-        return self::LABELS[$role] ?? ucfirst($role);
+        return self::REGISTRY[$role] ?? self::fallbackLabel($role);
     }
 
     /**
-     * Check if the role key is one of the known roles.
+     * True if the given role key is one of the known roles.
      */
     public static function isValid(?string $role): bool
     {
-        if ($role === null || $role === '') {
-            return false;
-        }
+        $role = self::normalize($role);
 
-        return in_array($role, self::all(), true);
+        return $role !== null && array_key_exists($role, self::REGISTRY);
     }
 
     /**
-     * Normalise role input (e.g. from request/query/route params).
+     * Normalize input (route params, request values, query strings).
      * Returns null if empty.
      */
     public static function normalize(?string $role): ?string
@@ -106,5 +95,13 @@ final class Roles
         $role = strtolower(trim($role));
 
         return $role !== '' ? $role : null;
+    }
+
+    /**
+     * Safe label fallback for unknown roles.
+     */
+    private static function fallbackLabel(string $role): string
+    {
+        return ucwords(str_replace(['-', '_'], ' ', $role));
     }
 }
