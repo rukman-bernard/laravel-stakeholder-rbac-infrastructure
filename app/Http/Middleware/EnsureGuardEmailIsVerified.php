@@ -8,7 +8,7 @@ use App\Services\Auth\GuardResolver;
 use Closure;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 final class EnsureGuardEmailIsVerified
 {
@@ -20,7 +20,7 @@ final class EnsureGuardEmailIsVerified
     /**
      * Ensure the authenticated user (under the resolved guard) has a verified email.
      *
-     * Usage:
+     * Usage examples:
      * - email.verified
      * - email.verified:web
      * - email.verified:student
@@ -28,19 +28,20 @@ final class EnsureGuardEmailIsVerified
      *
      * Rules:
      * - If multiple guards are provided, the first authenticated guard wins.
-     * - If no guards are provided, uses Guards::session() (single-session model).
-     * - If the user does not implement MustVerifyEmail, this middleware is a no-op.
+     * - If no guards are provided, defaults to all session guards (single-session model).
+     * - If the authenticated user does not implement MustVerifyEmail, this is a no-op.
      */
-    public function handle(Request $request, Closure $next, ...$guards)
+    public function handle(Request $request, Closure $next, ...$guards): Response
     {
-
         $guards = $this->normalizeGuards($guards);
 
-        // Resolve authenticated identity (first authenticated guard wins)
+        // First authenticated guard wins (your resolver contract)
         ['guard' => $guard, 'user' => $user] = $this->guardResolver->identity($guards);
 
+        // -------------------------------------------------------------
+        // 1) Not authenticated under any expected guard
+        // -------------------------------------------------------------
         if (! $user) {
-            // Not authenticated under any of the expected guards
             if ($request->expectsJson()) {
                 return response()->json(['error' => 'Unauthenticated.'], 401);
             }
@@ -48,39 +49,50 @@ final class EnsureGuardEmailIsVerified
             return $this->redirectService->redirectToLogin($request);
         }
 
-        // If verification is required and not satisfied, block access
+        // -------------------------------------------------------------
+        // 2) Authenticated but email is not verified (when required)
+        // -------------------------------------------------------------
         if ($user instanceof MustVerifyEmail && ! $user->hasVerifiedEmail()) {
             if ($request->expectsJson()) {
                 return response()->json(['error' => 'Email address is not verified.'], 403);
             }
 
-            return redirect()->route($this->verificationNoticeRouteFor($guard ?? Guards::default()));
+            // $guard should always be a string here if user exists, but keep fallback safe.
+            return redirect()->route($this->verificationNoticeRouteFor($guard ?: Guards::default()));
         }
 
+        // -------------------------------------------------------------
+        // 3) Verified (or verification not required)
+        // -------------------------------------------------------------
         return $next($request);
     }
 
     /**
-     * Normalise the middleware guard parameters.
+     * Normalize middleware guard parameters.
      *
-     * - Filters invalid/empty entries
-     * - If none provided, defaults to all session guards (consistent with single-session behaviour)
+     * - Removes invalid/empty entries
+     * - Normalizes names using Guards::normalize()
+     * - Deduplicates
+     * - If none provided, defaults to session guards (single-session model)
+     *
+     * @param  array<int, mixed>  $guards
+     * @return array<int, string>
      */
     private function normalizeGuards(array $guards): array
     {
-        $guards = collect($guards)
-            ->filter(fn ($g) => is_string($g) && $g !== '')
+        $normalized = collect($guards)
+            ->filter(fn ($g) => is_string($g) && trim($g) !== '')
             ->map(fn ($g) => Guards::normalize($g))
-            ->filter()
+            ->filter(fn ($g) => is_string($g) && $g !== '')
             ->unique()
             ->values()
             ->all();
 
-        return $guards ?: Guards::session();
+        return $normalized ?: Guards::session();
     }
 
     /**
-     * Resolve verification notice route name for the given guard.
+     * Resolve the verification notice route name for a guard.
      *
      * web    -> verification.notice
      * others -> {guard}.verification.notice (student.verification.notice, employer.verification.notice, ...)

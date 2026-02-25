@@ -45,17 +45,5 @@
             </form>
         </div>
     </div>
-
-<!--     @push('scripts')
-    <script>
-        Livewire.on('showModal', modalId => {
-            $('#' + modalId).modal('show');
-        });
-
-        Livewire.on('hideModal', modalId => {
-            $('#' + modalId).modal('hide');
-        });
-    </script>
-    @endpush -->
 </div>
 

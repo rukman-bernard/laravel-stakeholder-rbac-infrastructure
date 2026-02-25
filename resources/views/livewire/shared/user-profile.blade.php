@@ -16,7 +16,7 @@
             <!-- Image -->
             <div class="widget-user-image">
                 <img class="img-circle elevation-2"
-                     src="{{ $profile_image_url }}"
+                     src="{{ $profileImageUrl }}"
                      alt="User Avatar"
                      style="object-fit: cover; width:90px; height:90px;">
             </div>

@@ -63,20 +63,4 @@
         </div>
     </div>
 
-    <!-- @push('scripts')
-        <script>
-          document.addEventListener('livewire:init', () => {
-            Livewire.on('showModal', ({ modalId }) => {
-              if (!modalId) return;
-              $('#' + modalId).modal('show');
-            });
-
-            Livewire.on('hideModal', ({ modalId }) => {
-              if (!modalId) return;
-              $('#' + modalId).modal('hide');
-            });
-          });
-        </script>
-    @endpush -->
-
 </div>

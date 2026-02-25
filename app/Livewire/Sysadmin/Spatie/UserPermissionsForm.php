@@ -3,6 +3,8 @@
 namespace App\Livewire\Sysadmin\Spatie;
 
 use Livewire\Component;
+use App\Constants\Permissions as PermissionKeys;
+use App\Traits\AuthorizesWithPermissions;
 use App\Models\User;
 use Livewire\Attributes\Layout;
 use Spatie\Permission\Models\Role;
@@ -12,6 +14,7 @@ use Spatie\Permission\Models\Permission;
 // #[Layout('sysadmin.permissions')]
 class UserPermissionsForm extends Component
 {
+    use AuthorizesWithPermissions;
 
 
     public $userId;
@@ -23,8 +26,10 @@ class UserPermissionsForm extends Component
     public $selectedRoles = [];
     public $selectedPermissions = [];
 
-    public function mount(User $user)
+    public function mount(User $user): void
     {
+        $this->authorizePermission(PermissionKeys::VIEW_USERS, 'You do not have permission to view users.');
+
         $this->user = $user;
         $this->userId = $user->id;
 
@@ -34,24 +39,11 @@ class UserPermissionsForm extends Component
         $this->selectedRoles = $this->user->roles->pluck('id')->toArray();
         $this->selectedPermissions = $this->user->permissions->pluck('id')->toArray();
     }
-    // public function save()
-    // {
-    //     dd($this->selectedRoles);
-    //     // Sync roles (IDs are fine here)
-    //     $this->user->syncRoles($this->selectedRoles);
-    //     // dd("I am here 103");
-    
-    //     // Sync permissions (convert IDs to models)
-    //     $permissions = Permission::whereIn('id', $this->selectedPermissions)->get();
-    
-    //     $this->user->syncPermissions($permissions);
-    
-    //     session()->flash('message', 'Roles and permissions updated successfully!');
-    // }
 
-
-    public function save()
+    public function save(): void
     {
+        $this->authorizePermission(PermissionKeys::EDIT_USERS, 'You do not have permission to edit users.');
+
         // Convert role IDs to role models
         $roles = Role::whereIn('id', $this->selectedRoles)->get();
         

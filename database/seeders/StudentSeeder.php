@@ -19,7 +19,7 @@ class StudentSeeder extends Seeder
     {
         // 1) Named "baseline" student (idempotent)
         $student = Student::updateOrCreate(
-            ['email' => 'student@gmail.com'], // unique identifier
+            ['email' => 'student@example.com'], // unique identifier
             [
                 'name' => 'student',
                 'password' => Hash::make('password'),

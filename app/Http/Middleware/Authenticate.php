@@ -2,36 +2,51 @@
 
 namespace App\Http\Middleware;
 
-
-use App\Services\AdminLTE\AdminLTESettingsService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-// Services
-use App\Services\Auth\GuardRedirectService;
 use App\Services\Auth\GuardResolver;
+use App\Services\Auth\GuardRedirectService;
+use App\Services\AdminLTE\AdminLTESettingsService;
 
 class Authenticate
 {
-    
+    public function __construct(
+        private readonly GuardResolver $guardResolver,
+        private readonly GuardRedirectService $redirectService,
+        private readonly AdminLTESettingsService $adminLteService
+    ) {}
+
     public function handle(Request $request, Closure $next, ...$guards): Response
     {
-        $activeGuard = app(GuardResolver::class)->detect($guards);
+        $activeGuard = $this->guardResolver->detect($guards);
 
+        // -------------------------------------------------------------
+        // 1) Authenticated branch
+        // -------------------------------------------------------------
         if (is_string($activeGuard)) {
+
+            // Apply AdminLTE settings only for GET requests
             if ($request->isMethod('get')) {
-                app(AdminLTESettingsService::class)->apply($request,$activeGuard);
+                $this->adminLteService->apply($request, $activeGuard);
             }
+
             return $next($request);
         }
 
-        // Handle API requests
+        // -------------------------------------------------------------
+        // 2) Unauthenticated API request
+        // -------------------------------------------------------------
         if ($request->expectsJson()) {
-            return response()->json(['error' => 'Unauthenticated.'], 401);
+            return response()->json([
+                'error' => 'Unauthenticated.',
+            ], 401);
         }
 
-        // Web route unauthenticated — redirect via GuardRedirectService
-        return app(GuardRedirectService::class)->redirectToLogin($request);
+        // -------------------------------------------------------------
+        // 3) Unauthenticated Web request
+        // -------------------------------------------------------------
+        return $this->redirectService->redirectToLogin($request);
     }
 }

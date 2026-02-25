@@ -14,17 +14,17 @@ class UserSeeder extends Seeder
         $namedUsers = [
             [
                 'name' => 'System Admin',
-                'email' => 'sysadmin@gmail.com',
+                'email' => 'sysadmin@example.com',
                 'role' => Roles::SYSTEM_ADMIN,
             ],
             [
                 'name' => 'Super Admin',
-                'email' => 'superadmin@gmail.com',
+                'email' => 'superadmin@example.com',
                 'role' => Roles::SUPER_ADMIN,
             ],
             [
                 'name' => 'Admin',
-                'email' => 'admin@gmail.com',
+                'email' => 'admin@example.com',
                 'role' => Roles::ADMIN,
             ],
         ];

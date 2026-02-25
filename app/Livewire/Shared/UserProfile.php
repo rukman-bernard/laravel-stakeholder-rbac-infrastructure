@@ -2,65 +2,83 @@
 
 namespace App\Livewire\Shared;
 
+use App\Constants\Guards;
 use App\Services\Auth\GuardResolver;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-class UserProfile extends Component
+final class UserProfile extends Component
 {
+    public string $guard = Guards::WEB;
+
     public string $name = '';
     public string $email = '';
-    public string $profile_image_url = '';
-    public string $guard = 'web';
+    public string $profileImageUrl = '';
 
     public function mount(GuardResolver $guardResolver): void
     {
-        ['guard' => $guard] = $guardResolver->identity();
-        $this->guard = $guard ?? $this->guard;
+        // Resolve the active guard from the single-session model.
+        // If resolution fails, fall back to web.
+        $identity = $guardResolver->identity();
+        $this->guard = is_array($identity) && ! empty($identity['guard'])
+            ? (string) $identity['guard']
+            : Guards::WEB;
 
-        $this->loadUser();
+        $this->hydrateFromAuthUser();
     }
 
-    private function loadUser(): void
+    /**
+     * Keep this method as the only place that reads current user -> component state.
+     * This avoids duplicated logic across mount/update/refresh.
+     */
+    private function hydrateFromAuthUser(): void
     {
-        $user = Auth::guard($this->guard)->user();
+        $user = $this->authUser();
 
-        $this->name = $user?->name ?? '';
+        $this->name  = $user?->name ?? '';
         $this->email = $user?->email ?? '';
 
-        // ✅ Use accessor (works for both User + Student consistently)
-        $this->profile_image_url = $user?->profile_image_url
+        // Uses the accessor on User/Student/Employer models (profile_image_url)
+        $this->profileImageUrl = $user?->profile_image_url
             ?? asset('images/default-avatar.png');
     }
 
-    #[On('profile-photo-updated')]
-    public function refreshAfterPhotoUpload(): void
+    private function authUser()
     {
-        $this->loadUser();
+        return Auth::guard($this->guard)->user();
+    }
+
+    protected function rules(): array
+    {
+        return [
+            'name'  => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255'],
+        ];
+    }
+
+    #[On('profile-photo-updated')]
+    public function refreshProfilePhoto(): void
+    {
+        $this->hydrateFromAuthUser();
     }
 
     public function updateProfile(): void
     {
-        $user = Auth::guard($this->guard)->user();
+        $user = $this->authUser();
 
         if (! $user) {
             $this->addError('auth', 'Your session has expired. Please sign in again.');
             return;
         }
 
-        $this->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email'],
-        ]);
+        $validated = $this->validate();
 
-        $user->update([
-            'name' => $this->name,
-            'email' => $this->email,
-        ]);
+        // If you want email changes to require re-verification later,
+        // this is where you'd add that logic.
+        $user->forceFill($validated)->save();
 
-        // Reload so UI always reflects DB source-of-truth
-        $this->loadUser();
+        $this->hydrateFromAuthUser();
 
         session()->flash('success', 'Profile updated successfully.');
     }

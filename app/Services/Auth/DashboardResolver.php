@@ -2,72 +2,124 @@
 
 namespace App\Services\Auth;
 
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
 final class DashboardResolver
 {
+    private const FALLBACK_ROUTE = 'auth.reset';
+
     /**
      * Resolve dashboard route name for a given guard and optional role.
-     * Falls back to 'auth.reset' when not resolvable.
+     *
+     * Supported config shapes:
+     * - nka.auth.dashboard_routes.<guard> = "route.name"
+     * - nka.auth.dashboard_routes.<guard> = [
+     *       "default" => "route.name",
+     *       "roles"   => ["role" => "route.name"]
+     *   ]
      */
     public function routeName(string $guard, ?string $role = null): string
     {
         $config = config("nka.auth.dashboard_routes.$guard");
+
         if (is_string($config)) {
-            return trim($config);
+            return $this->cleanRouteName($config);
         }
 
         if (is_array($config)) {
-            if ($role && isset($config['roles'][$role])) {
-                return trim($config['roles'][$role]);
+            $roleRoute = $role ? ($config['roles'][$role] ?? null) : null;
+
+            if (is_string($roleRoute) && $roleRoute !== '') {
+                return $this->cleanRouteName($roleRoute);
             }
 
-            return trim($config['default'] ?? 'auth.reset');
+            return $this->cleanRouteName($config['default'] ?? self::FALLBACK_ROUTE);
         }
 
-        return 'auth.reset';
+        return self::FALLBACK_ROUTE;
     }
 
     /**
-     * Resolve dashboard URL from the route name.
+     * Resolve dashboard URL from the resolved route name.
+     *
+     * Safety:
+     * - If the resolved route does not exist, falls back to auth.reset.
+     * - If auth.reset is also missing, falls back to "/".
      */
     public function url(string $guard, ?string $role = null): string
     {
-        return route($this->routeName($guard, $role));
+        $routeName = $this->routeName($guard, $role);
+
+        if (Route::has($routeName)) {
+            return route($routeName);
+        }
+
+        // Config drift safety-net
+        if (Route::has(self::FALLBACK_ROUTE)) {
+            return route(self::FALLBACK_ROUTE);
+        }
+
+        return url('/');
     }
 
     /**
      * Resolve highest priority role for a user under a given guard.
-     * Uses config('nka.dashboard_role_priority.<guard>') first, then alphabetical fallback.
+     *
+     * Priority source:
+     * - config('nka.dashboard_role_priority.<guard>') (explicit order)
+     * - fallback: alphabetical by role key
      */
-    public function highestPriorityRole(string $guard, $user): ?string
+    public function highestPriorityRole(string $guard, mixed $user): ?string
     {
-        if (! $user || ! method_exists($user, 'getRoleNames')) {
-            return null;
-        }
-
-        $roles = $user->getRoleNames()
-            ->filter(fn ($r) => is_string($r))
-            ->values();
+        $roles = $this->getUserRoleNames($user);
 
         if ($roles->isEmpty()) {
             return null;
         }
 
-        $priority = config("nka.dashboard_role_priority.$guard", []);
+        $priority = $this->normalizedPriorityList($guard);
 
-        $priorityLower = collect($priority)
-            ->filter(fn ($r) => is_string($r))
-            ->map(fn ($r) => Str::lower($r))
-            ->values();
-
-        foreach ($priorityLower as $prio) {
-            $matched = $roles->first(fn ($r) => Str::lower($r) === $prio);
-            if ($matched) {
-                return $matched;
+        foreach ($priority as $prio) {
+            $match = $roles->first(fn (string $r) => Str::lower($r) === $prio);
+            if ($match !== null) {
+                return $match;
             }
         }
 
-        return $roles->sortBy(fn ($r) => Str::lower($r))->first();
+        return $roles->sortBy(fn (string $r) => Str::lower($r))->first();
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int, string>
+     */
+    private function getUserRoleNames(mixed $user): Collection
+    {
+        if (! $user || ! method_exists($user, 'getRoleNames')) {
+            return collect();
+        }
+
+        return collect($user->getRoleNames())
+            ->filter(fn ($r) => is_string($r) && $r !== '')
+            ->values();
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int, string> Lower-cased role keys in priority order.
+     */
+    private function normalizedPriorityList(string $guard): Collection
+    {
+        return collect(config("nka.dashboard_role_priority.$guard", []))
+            ->filter(fn ($r) => is_string($r) && $r !== '')
+            ->map(fn (string $r) => Str::lower(trim($r)))
+            ->values();
+    }
+
+    private function cleanRouteName(string $route): string
+    {
+        $route = trim($route);
+
+        return $route !== '' ? $route : self::FALLBACK_ROUTE;
     }
 }

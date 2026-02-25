@@ -8,6 +8,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Symfony\Component\HttpFoundation\Response;
 
 final class RedirectLoggedInToDashboard
 {
@@ -16,42 +17,54 @@ final class RedirectLoggedInToDashboard
         private readonly DashboardResolver $dashboardResolver,
     ) {}
 
-    public function handle(Request $request, Closure $next)
+    /**
+     * If a session-authenticated user hits a guest-only page (e.g., login),
+     * redirect them to the correct dashboard for their active guard/role.
+     *
+     * This supports the single-session model: first authenticated guard (by priority) wins.
+     */
+    public function handle(Request $request, Closure $next): Response
     {
-        // Allow the recovery route to load without loops
+        // Allow the recovery route to load without redirect loops.
         if ($request->routeIs('auth.reset')) {
             return $next($request);
         }
 
-        // Only iterate guards that are actually configured as session guards
         foreach ($this->guardResolver->configuredSessionGuardsInPriorityOrder() as $guard) {
-            if (Auth::guard($guard)->check()) {
-                return $this->redirectToDashboard($guard);
+            $auth = Auth::guard($guard);
+
+            if ($auth->check()) {
+                return $this->redirectToDashboard($guard, $auth->user());
             }
         }
 
         return $next($request);
     }
 
-    private function redirectToDashboard(string $guard)
+    /**
+     * Resolve the best dashboard route for the authenticated identity.
+     *
+     * @param  string  $guard  The active guard we detected.
+     * @param  mixed   $user   The authenticated user instance for that guard (may be null defensively).
+     */
+    private function redirectToDashboard(string $guard, mixed $user): Response
     {
-        $user = Auth::guard($guard)->user();
-
+        // Defensive: if check() was true but user retrieval failed for some reason.
         if (! $user) {
-            // Defensive: if check() was true but user retrieval failed
             return redirect()->route('auth.reset');
         }
 
-        // Role-aware for guards that support roles, otherwise null
+        // Role-aware for guards that support roles; otherwise null.
         $role = $this->dashboardResolver->highestPriorityRole($guard, $user);
 
+        // Resolve route name from config/mapping.
         $routeName = $this->dashboardResolver->routeName($guard, $role);
 
-        // Fail-safe if config drift occurs
+        // Fail-safe if config drift occurs (route removed/renamed).
         if (! Route::has($routeName)) {
             return redirect()->route('auth.reset');
         }
 
-        return redirect()->to(route($routeName));
+        return redirect()->route($routeName);
     }
 }

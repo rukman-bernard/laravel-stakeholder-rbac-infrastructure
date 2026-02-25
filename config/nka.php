@@ -49,6 +49,19 @@ return [
             'student'  => 'students',
             'employer' => 'employers',
         ],
+
+        'reset_password' => [
+            'labels' => [
+                'student'  => 'NKA Student',
+                'employer' => 'NKA Employer',
+                'web'      => 'NKA Staff',
+            ],
+            'subjects' => [
+                'student'  => 'Reset Your NKA Student Account Password',
+                'employer' => 'Reset Your NKA Employer Account Password',
+                'web'      => 'Reset Your NKA Staff Account Password',
+            ],
+        ],
     ],
 
     /*
@@ -66,7 +79,7 @@ return [
         ],
 
         'js'=> [
-            'web' => 'resources/js/web/misc.js',
+            'web' => 'resources/js/shared/library.js',
         ],
 
         /*

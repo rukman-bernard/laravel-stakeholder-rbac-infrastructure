@@ -10,7 +10,6 @@
         <div class="card-header">
             <h3 class="card-title">Users</h3>
             <div class="card-tools">
-@section('content_header_title', $header_title)
                 @can(Permissions::CREATE_USERS)
                     <a class="btn btn-success btn-sm" href="{{ route('sysadmin.users.create') }}">
                         <i class="fas fa-plus"></i> Add User
@@ -76,28 +75,34 @@
                                 
                             </td>
                             <td>
-                                <div style="display: flex; gap: 5px;">
-                                    @can(Permissions::EDIT_USERS)
-                                        <form action="{{ route('sysadmin.users.edit', ['user' => $user->id]) }}" method="POST">
-                                            @csrf
-                                            @method('PUT')
-                                            <button type="submit" class="btn btn-warning btn-sm">Edit</button>
-                                        </form>
-                                    @endcan
+                                <td>
+                                    <div class="d-flex" style="gap: 5px;">
+                                        @can(Permissions::EDIT_USERS)
+                                            <a href="{{ route('sysadmin.users.edit', $user->id) }}"
+                                               class="btn btn-warning btn-sm">
+                                                Edit
+                                            </a>
+                                        @endcan
 
-                                    @can(Permissions::DELETE_USERS)
-                                        {{-- <button wire:click="delete({{ $user->id }})" class="btn btn-danger btn-sm">Delete</button> --}}
-                                        <button 
-                                            x-data
-                                            x-on:click="if (confirm('Are you sure?')) { $wire.deleteRole(6) }"
-                                            class="btn btn-sm btn-danger"
-                                        >
-                                            Delete
-                                        </button>
-                                    @endcan
+                                        @can(Permissions::DELETE_USERS)
+                                            <button
+                                                type="button"
+                                                x-data
+                                                x-on:click="if (confirm('Are you sure?')) { $wire.deleteUser({{ $user->id }}) }"
+                                                class="btn btn-danger btn-sm"
+                                            >
+                                                Delete
+                                            </button>
+                                        @endcan
 
-                                    <a href="{{ route('sysadmin.users.permissions', $user->id) }}" class="btn btn-sm btn-info">Permissions</a>
-                                </div>
+                                        @can(Permissions::EDIT_USERS)
+                                            <a href="{{ route('sysadmin.users.permissions', $user->id) }}"
+                                               class="btn btn-info btn-sm">
+                                                Permissions
+                                            </a>
+                                        @endcan
+                                    </div>
+                                </td>
                             </td>
                         </tr>
                         @empty

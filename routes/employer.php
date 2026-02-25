@@ -1,17 +1,35 @@
 <?php
 
 use App\Constants\Guards;
-use App\Livewire\Employer\Dashboard;
+use App\Livewire\Employer\Dashboard\Dashboard as EmployerDashboard;
 use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| Employer Portal Routes
+|--------------------------------------------------------------------------
+|
+| Guard: employer
+| Middleware:
+| - auth:employer
+| - email.verified:employer
+|
+| All routes are:
+| - Prefixed with /employer
+| - Named employer.*
+|
+*/
 
-// Employer Dashboard Routes
-Route::middleware([
-    'auth:' . Guards::EMPLOYER,
-    'email.verified:' . Guards::EMPLOYER,
-])->prefix(Guards::EMPLOYER)->as(Guards::EMPLOYER.'.')->group(function () {
+Route::prefix(Guards::EMPLOYER)
+    ->as(Guards::EMPLOYER . '.')
+    ->middleware([
+        'auth:' . Guards::EMPLOYER,
+        'email.verified:' . Guards::EMPLOYER,
+    ])
+    ->group(function () {
 
-    // Route::get('/dashboard', [App\Http\Controllers\Student\StudentDashboardController::class, 'index'])->name('dashboard.index');
-    Route::get('/dashboard', Dashboard::class)->name('dashboard');
-});
+        Route::get('/dashboard', EmployerDashboard::class)
+            ->name('dashboard');
 
+        // Future employer routes go here
+    });

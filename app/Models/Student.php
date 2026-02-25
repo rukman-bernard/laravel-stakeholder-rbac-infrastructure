@@ -94,7 +94,8 @@ class Student extends Authenticatable implements CanResetPassword, MustVerifyEma
 
     public function sendPasswordResetNotification($token): void
     {
-        $this->notify(new StudentResetPasswordNotification($token));
+        // $this->notify(new StudentResetPasswordNotification($token));
+        $this->notify(new \App\Notifications\StakeholderResetPasswordNotification($token));
     }
 
     /*

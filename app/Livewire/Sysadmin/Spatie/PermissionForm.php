@@ -1,52 +1,69 @@
 <?php
+
 namespace App\Livewire\Sysadmin\Spatie;
 
 use App\Constants\Guards;
-use Livewire\Attributes\Layout;
+use App\Constants\Permissions;
+use App\Traits\AuthorizesWithPermissions;
 use Livewire\Component;
 use Spatie\Permission\Models\Permission;
 
-
-// #[Layout('syssysadmin.permissions')]
-class PermissionForm extends Component
+final class PermissionForm extends Component
 {
+    use AuthorizesWithPermissions;
 
-    public $permissionId;
-    public $name;
-    public $guard_name = Guards::WEB; // default guard
-    public $mode = 'create';
+    public ?int $permissionId = null;
+    public string $name = '';
+    public string $guard_name = Guards::WEB;
+    public string $mode = 'create';
 
-    protected $rules = [
-        'name' => 'required|string|max:255',
-        'guard_name' => 'required|string|max:255',
+    protected $listeners = [
+        'permission:open' => 'open',
     ];
 
-    protected $listeners = ['openModal' => 'showModal'];
-
-    public function showModal($params)
+    public function rules(): array
     {
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'guard_name' => ['required', 'string', 'max:255'],
+        ];
+    }
+
+    public function open(string $mode, ?int $id = null): void
+    {
+        $this->authorizePermission(
+            $mode === 'edit' ? Permissions::EDIT_PERMISSIONS : Permissions::CREATE_PERMISSIONS,
+            'You do not have permission to manage permissions.'
+        );
+
         $this->resetValidation();
-        $this->reset();
+        $this->reset(['permissionId', 'name', 'guard_name', 'mode']);
 
-        $this->mode = $params['mode'];
+        $this->mode = $mode;
 
-        if ($this->mode === 'edit' && !empty($params['id'])) {
-            $permission = Permission::findOrFail($params['id']);
+        if ($mode === 'edit' && $id) {
+            $permission = Permission::query()->findOrFail($id);
+
             $this->permissionId = $permission->id;
             $this->name = $permission->name;
             $this->guard_name = $permission->guard_name;
         }
 
-        $this->dispatch('showModal', 'permissionModal');
+        $this->dispatch('modal:show', modalId: 'permissionModal');
     }
 
-    public function closeModal()
+    public function closeModal(): void
     {
-        $this->dispatch('hideModal', 'permissionModal');
+        $this->dispatch('modal:hide', modalId: 'permissionModal');
     }
 
-    public function save()
+    public function save(): void
     {
+        $this->authorizePermission(
+            $this->permissionId ? Permissions::EDIT_PERMISSIONS : Permissions::CREATE_PERMISSIONS,
+            'You do not have permission to save permissions.'
+        );
+
         $this->validate();
 
         Permission::updateOrCreate(
@@ -57,8 +74,9 @@ class PermissionForm extends Component
             ]
         );
 
-        $this->dispatch('hideModal', 'permissionModal');
-        $this->dispatch('refreshPermissions');
+        $this->dispatch('modal:hide', modalId: 'permissionModal');
+        $this->dispatch('permissions:refresh');
+        session()->flash('message', $this->permissionId ? 'Permission updated!' : 'Permission created!');
     }
 
     public function render()

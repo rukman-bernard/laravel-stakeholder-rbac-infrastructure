@@ -1,6 +1,6 @@
 # NKA Academic Management System (NKA-AMS)
 
-**A modular, Dockerised academic management platform built with Laravel 11 and a multi-guard RBAC architecture.**
+**A Dockerised academic management platform built with Laravel 11 and a multi-guard RBAC architecture.**
 
 ---
 
@@ -10,6 +10,8 @@
 - Docker + Docker Compose v2
 
 ### First run (fresh clone)
+The system can be instantiated reproducibly via Docker using the following procedure.
+
 ```bash
 cp .env.example .env    # optional: entrypoint will auto-create .env if missing
 docker compose up -d --build
@@ -67,7 +69,7 @@ Authentication, session storage, caching, queue handling, and database persisten
 
 ### Stateless Application Layer
 
-The Laravel container is stateless. Persistent state is externalised to Redis and MariaDB.
+The Laravel container is stateless in order to ensure horizontal scalability and container restart safety.
 
 ### Deterministic Multi-Guard Authentication
 
@@ -90,7 +92,7 @@ Architectural decisions are formalised and versioned alongside code changes.
 | UI Framework                   | AdminLTE                                             |
 | Frontend Tooling               | Vite + Node.js                                       |
 | Database                       | MariaDB (Dockerised)                                 |
-| State Layer                    | Redis (phpredis extension)                           |
+| State Layer                    | Redis (via phpredis extension for high-performance state transport)|
 | Environment                    | Docker & Docker Compose                              |
 | Testing                        | Isolated environment via `.env.testing`              |
 
@@ -204,7 +206,7 @@ Functional modules are introduced only after formalised requirement validation.
 
 ## 9. System Integrity Guarantees
 
-The architecture ensures:
+The architecture is designed to provide:
 
 * single-session enforcement consistency
 

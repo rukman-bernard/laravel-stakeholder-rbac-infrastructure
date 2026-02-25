@@ -8,10 +8,12 @@ use Spatie\Permission\Models\Permission;
 use Illuminate\Validation\Rule;
 use App\Constants\Guards;
 use App\Constants\Permissions;
-use Illuminate\Auth\Access\AuthorizationException;
+use App\Traits\AuthorizesWithPermissions;
 
 class RoleForm extends Component
 {
+    use AuthorizesWithPermissions;
+
     public $roleId;
     public $name = '';
     public $guard_name = Guards::WEB;
@@ -31,41 +33,27 @@ class RoleForm extends Component
         'editRole' => 'edit',
     ];
 
-    public function mount()
+    public function mount(): void
     {
         $this->allPermissions = Permission::all();
     }
 
-    public function create()
+    public function create(): void
     {
-        try {
-
-            $this->authorize(Permissions::CREATE_ROLES);
-
-        } catch (AuthorizationException $e) {
-            //This action can be customized as required.
-            abort(403, 'You do not have permission to create roles.');
-        }
+        $this->authorizePermission(Permissions::CREATE_ROLES, 'You do not have permission to create roles.');
 
 
         $this->reset(['roleId', 'name', 'guard_name', 'permissions']);
         $this->mode = 'create';
         // $this->dispatch('showModal', 'roleModal');
-        $this->dispatch('showModal', modalId: 'roleModal');
+        $this->dispatch('modal:show', modalId: 'roleModal');
 
 
     }
 
-    public function edit($id)
+    public function edit(int $id): void
     {
-        try {
-
-            $this->authorize(Permissions::EDIT_ROLES);
-
-        } catch (AuthorizationException $e) {
-            //This action can be customized as required.
-            abort(403, 'You do not have permission to edit roles.');
-        }
+        $this->authorizePermission(Permissions::EDIT_ROLES, 'You do not have permission to edit roles.');
 
         $role = Role::findOrFail($id);
         $this->roleId = $role->id;
@@ -74,17 +62,23 @@ class RoleForm extends Component
         $this->permissions = $role->permissions->pluck('name')->toArray();
         $this->mode = 'edit';
         // $this->dispatch('showModal', 'roleModal');
-        $this->dispatch('showModal', modalId: 'roleModal');
+        $this->dispatch('modal:show', modalId: 'roleModal');
     }
 
-    public function closeModal()
+    public function closeModal(): void
     {
         // $this->dispatch('hideModal', 'roleModal');
-        $this->dispatch('hideModal', modalId: 'roleModal');
+        $this->dispatch('modal:hide', modalId: 'roleModal');
     }
 
-    public function save()
+    public function save(): void
     {
+        // Save is used for both create + edit.
+        $this->authorizePermission(
+            $this->roleId ? Permissions::EDIT_ROLES : Permissions::CREATE_ROLES,
+            'You do not have permission to save roles.'
+        );
+
         $validated = $this->validate([
             'name' => [
                 'required', 'string', 'min:3',
@@ -103,7 +97,7 @@ class RoleForm extends Component
 
         session()->flash('message', $this->roleId ? 'Role updated!' : 'Role created!');
 
-        $this->dispatch('hideModal', 'roleModal');
+        $this->dispatch('modal:hide', modalId: 'roleModal');
         $this->dispatch('roleUpdated');
     }
 

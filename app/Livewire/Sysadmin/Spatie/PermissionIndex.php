@@ -3,95 +3,61 @@
 namespace App\Livewire\Sysadmin\Spatie;
 
 use App\Constants\Permissions;
-use Illuminate\Auth\Access\AuthorizationException;
-use Livewire\Attributes\Layout;
+use App\Traits\AuthorizesWithPermissions;
 use Livewire\Component;
 use Spatie\Permission\Models\Permission;
 
- 
-// #[Layout('sysadmin.permissions')]
-class PermissionIndex extends Component
+final class PermissionIndex extends Component
 {
+    use AuthorizesWithPermissions;
+
     public string $header_title = 'Permissions';
     public string $subtitle = 'Index';
 
-    public $permissions = [];
+    public array $permissions = [];
 
     protected $listeners = [
-        'refreshPermissions' => 'loadPermissions'
+        'permissions:refresh' => 'loadPermissions',
     ];
 
-    public function mount()
+    public function mount(): void
     {
-        
         $this->loadPermissions();
     }
 
-    public function loadPermissions()
+    public function loadPermissions(): void
     {
-        $this->permissions = Permission::all();
+        $this->permissions = Permission::query()->orderBy('id')->get()->all();
     }
 
-    public function create()
+    public function create(): void
     {
-        try {
+        $this->authorizePermission(Permissions::CREATE_PERMISSIONS, 'You do not have permission to create permissions.');
 
-            $this->authorize(Permissions::CREATE_PERMISSIONS);
-
-        } catch (AuthorizationException $e) {
-            //This action can be customized as required.
-            abort(403, 'You do not have permission to create permissions.');
-        }
-
-
-        $this->dispatch('openModal', ['mode' => 'create']);
+        // Tell the form to open in create mode
+        $this->dispatch('permission:open', mode: 'create');
     }
 
-    public function edit($id)
+    public function edit(int $id): void
     {
-        try {
+        $this->authorizePermission(Permissions::EDIT_PERMISSIONS, 'You do not have permission to edit permissions.');
 
-            $this->authorize(Permissions::EDIT_PERMISSIONS);
-
-        } catch (AuthorizationException $e) {
-            //This action can be customized as required.
-            abort(403, 'You do not have permission to edit permissions.');
-        }
-
-
-        $this->dispatch('openModal', ['mode' => 'edit', 'id' => $id]);
+        // Tell the form to open in edit mode
+        $this->dispatch('permission:open', mode: 'edit', id: $id);
     }
 
-    public function delete($id)
+    public function delete(int $id): void
     {
-        try {
+        $this->authorizePermission(Permissions::DELETE_PERMISSIONS, 'You do not have permission to delete permissions.');
 
-            $this->authorize(Permissions::DELETE_PERMISSIONS);
-
-        } catch (AuthorizationException $e) {
-            //This action can be customized as required.
-            abort(403, 'You do not have permission to delete permissions.');
-        }
-
-
-        Permission::find($id)?->delete();
+        Permission::query()->whereKey($id)->delete();
         $this->loadPermissions();
     }
 
     public function render()
     {
+        $this->authorizePermission(Permissions::VIEW_PERMISSIONS, 'You do not have permission to view permissions.');
 
-        try {
-
-            $this->authorize(Permissions::VIEW_PERMISSIONS);
-
-        } catch (AuthorizationException $e) {
-            //This action can be customized as required.
-            abort(403, 'You do not have permission to view permissions.');
-        }
-
-
-        
         return view('livewire.sysadmin.spatie.permission-index');
     }
 }

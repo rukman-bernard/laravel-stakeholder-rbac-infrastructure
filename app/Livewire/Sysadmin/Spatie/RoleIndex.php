@@ -3,36 +3,33 @@
 namespace App\Livewire\Sysadmin\Spatie;
 
 use App\Constants\Permissions;
-use Illuminate\Auth\Access\AuthorizationException;
+use App\Traits\AuthorizesWithPermissions;
 use Livewire\Component;
 use Spatie\Permission\Models\Role;
 
 class RoleIndex extends Component
 {
+    use AuthorizesWithPermissions;
+
+    /** @var \Illuminate\Support\Collection<int, Role> */
     public $roles;
 
     protected $listeners = ['roleUpdated' => 'loadRoles'];
 
-    public function mount()
+    public function mount(): void
     {
+        $this->authorizePermission(Permissions::VIEW_ROLES, 'You do not have permission to view roles.');
         $this->loadRoles();
     }
 
-    public function loadRoles()
+    public function loadRoles(): void
     {
         $this->roles = Role::all();
     }
 
-    public function deleteRole($roleId)
+    public function deleteRole(int $roleId): void
     {
-        try {
-
-            $this->authorize(Permissions::DELETE_ROLES);
-
-        } catch (AuthorizationException $e) {
-            //This action can be customized as required.
-            abort(403, 'You do not have permission to delete roles.');
-        }
+        $this->authorizePermission(Permissions::DELETE_ROLES, 'You do not have permission to delete roles.');
 
         $role = Role::find($roleId);
 
@@ -51,15 +48,6 @@ class RoleIndex extends Component
 
     public function render()
     {
-        try {
-
-            $this->authorize(Permissions::VIEW_ROLES);
-
-        } catch (AuthorizationException $e) {
-            //This action can be customized as required.
-            abort(403, 'You do not have permission to view roles.');
-        }
-
         return view('livewire.sysadmin.spatie.role-index');
     }
 }

@@ -80,7 +80,8 @@ class Employer extends Authenticatable implements CanResetPassword, MustVerifyEm
      */
     public function sendPasswordResetNotification($token): void
     {
-        $this->notify(new EmployerResetPasswordNotification($token));
+        // $this->notify(new EmployerResetPasswordNotification($token));
+        $this->notify(new \App\Notifications\StakeholderResetPasswordNotification($token));
     }
 
     /**

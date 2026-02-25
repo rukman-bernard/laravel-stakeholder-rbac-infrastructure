@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Shared;
 
+use App\Constants\Guards;
 use App\Services\Auth\GuardResolver;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -9,23 +10,40 @@ use Illuminate\Validation\Rules\File;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-class ProfilePhotoUploader extends Component
+final class ProfilePhotoUploader extends Component
 {
     use WithFileUploads;
 
+    /**
+     * Livewire temporary uploaded file.
+     *
+     * @var \Livewire\Features\SupportFileUploads\TemporaryUploadedFile|null
+     */
     public $photo = null;
-    public string $guard = 'web';
+
+    /**
+     * Resolved guard for the current authenticated session (single-session model).
+     */
+    public string $guard = Guards::WEB;
 
     public function mount(GuardResolver $guardResolver): void
     {
-        $this->guard = $guardResolver->detect() ?? 'web';
+        // Resolve the active authenticated guard deterministically.
+        $resolved = $guardResolver->detect(Guards::session());
+        $this->guard = is_string($resolved) ? $resolved : Guards::WEB;
     }
 
-    public function photoUpload(): void
+    protected function rules(): array
     {
-        $this->validate([
+        return [
+            // 1024 KB = 1 MB (same as your original)
             'photo' => ['required', File::image()->max(1024)],
-        ]);
+        ];
+    }
+
+    public function uploadPhoto(): void
+    {
+        $this->validate();
 
         $user = Auth::guard($this->guard)->user();
 
@@ -34,21 +52,24 @@ class ProfilePhotoUploader extends Component
             return;
         }
 
-        // Delete old image if exists
-        if ($user->image_path && Storage::disk('public')->exists($user->image_path)) {
-            Storage::disk('public')->delete($user->image_path);
+        // Store first (safer). If storage fails, we won't delete the old image.
+        $newPath = $this->photo->store('avatars', 'public');
+
+        // Remember the old image for cleanup after DB update
+        $oldPath = $user->image_path;
+
+        // Persist the new path
+        $user->forceFill(['image_path' => $newPath])->save();
+
+        // Best-effort cleanup of old image
+        if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+            Storage::disk('public')->delete($oldPath);
         }
 
-        // Store new image (storage/app/public/avatars)
-        $path = $this->photo->store('avatars', 'public');
-
-        // Persist
-        $user->forceFill(['image_path' => $path])->save();
-
-        // Reset the upload input + preview
+        // Reset upload input (clears preview)
         $this->reset('photo');
 
-        // Tell profile component to refresh image without full reload (optional UX improvement)
+        // Let any listening components refresh UI (e.g., navbar avatar)
         $this->dispatch('profile-photo-updated');
 
         session()->flash('success', 'Profile photo updated!');

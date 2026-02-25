@@ -3,8 +3,8 @@
 namespace App\Livewire\Sysadmin\Spatie;
 
 use App\Constants\Permissions;
+use App\Traits\AuthorizesWithPermissions;
 use App\Models\User;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
@@ -12,6 +12,7 @@ use Livewire\Attributes\Layout;
 // #[Layout('sysadmin.users')]
 class UserForm extends Component
 {
+    use AuthorizesWithPermissions;
 
     public string $header_title = 'Permissions';
     public string $subtitle = '';
@@ -25,41 +26,18 @@ class UserForm extends Component
 
 
     // You can pass an existing user from another component or route
-    public function mount(User $user)
+    public function mount(User $user): void
     {
-        
         if ($user->id) {
-            
-            try {
-                
-                $this->authorize(Permissions::EDIT_USERS);
-    
-            } catch (AuthorizationException $e) {
-                //This action can be customized as required.
-                abort(403, 'You do not have permission to edit users.');
-            }
-
-
+            $this->authorizePermission(Permissions::EDIT_USERS, 'You do not have permission to edit users.');
 
             $this->user = $user;
             $this->name = $user->name;
             $this->email = $user->email;
             $this->roles = $user->roles()->pluck('name')->toArray(); // If using Spatie
             $this->subtitle = 'Edit';
-        }
-        else
-        {
-            try {
-                
-                $this->authorize(Permissions::CREATE_USERS);
-    
-            } catch (AuthorizationException $e) {
-                //This action can be customized as required.
-                abort(403, 'You do not have permission to create users.');
-            }
-
-            
-    
+        } else {
+            $this->authorizePermission(Permissions::CREATE_USERS, 'You do not have permission to create users.');
             $this->subtitle = 'Create';
         }
     }
@@ -74,8 +52,13 @@ class UserForm extends Component
         ];
     }
 
-    public function save()
+    public function save(): void
     {
+        $this->authorizePermission(
+            $this->user?->id ? Permissions::EDIT_USERS : Permissions::CREATE_USERS,
+            'You do not have permission to save users.'
+        );
+
         $this->validate();
 
         $user = $this->user ?? new User();

@@ -2,26 +2,37 @@
 
 namespace App\Livewire\Admin\Dashboard;
 
-use App\Constants\Permissions;
-use App\Models\Level;
-use App\Models\Programme;
-use Illuminate\Auth\Access\AuthorizationException;
 use Livewire\Component;
 
-class Dashboard extends Component
+final class Dashboard extends Component
 {
+    /**
+     * Page header (used by the shared AdminLTE layout).
+     */
     public string $header_title = 'Dashboard';
+
+    /**
+     * Optional subtitle shown under the header.
+     */
     public string $subtitle = '';
 
-    public $programmeLabels = [], $programmeCounts = [];
-    public $levelLabels = [], $levelCounts = [];
-
-    public function mount()
+    /**
+     * Component boot hook.
+     *
+     * Keep this method even if empty for now:
+     * - dashboard pages typically evolve to load stats/cards
+     * - mount() is the canonical place for that initial state
+     */
+    public function mount(): void
     {
-
+        // Intentionally empty (reserved for future dashboard metrics).
     }
 
+    /**
+     * Render the dashboard view.
+     */
     public function render()
     {
         return view('livewire.admin.dashboard.dashboard');
-    }}
+    }
+}

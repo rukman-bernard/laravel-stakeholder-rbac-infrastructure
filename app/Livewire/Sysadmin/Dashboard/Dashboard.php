@@ -3,28 +3,40 @@
 namespace App\Livewire\Sysadmin\Dashboard;
 
 use App\Constants\Permissions;
-use Illuminate\Auth\Access\AuthorizationException;
-use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\Attributes\Layout;
 
-// #[Layout('sysadmin.roles')]
-class Dashboard extends Component
+#[Layout('components.layouts.app')]
+final class Dashboard extends Component
 {
+    /**
+     * Page header (used by shared layout).
+     */
     public string $header_title = 'Dashboard';
+
+    /**
+     * Optional subtitle.
+     */
     public string $subtitle = '';
 
+    /**
+     * Authorisation check for sysadmin dashboard.
+     *
+     * We perform this in mount() instead of render() so that:
+     * - The check runs once
+     * - The component does not partially render
+     * - Laravel handles 403 automatically
+     */
+    public function mount(): void
+    {
+        $this->authorize(Permissions::VIEW_SYSTEM_ADMIN_DASHBOARD);
+    }
+
+    /**
+     * Render the sysadmin dashboard view.
+     */
     public function render()
     {
-        try {
-
-            $this->authorize(Permissions::VIEW_SYSTEM_ADMIN_DASHBOARD);
-
-        } catch (AuthorizationException $e) {
-
-            abort(403, 'You do not have permission to view system admin dashboard.');
-            
-        }
-
         return view('livewire.sysadmin.dashboard.dashboard');
     }
 }

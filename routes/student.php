@@ -1,18 +1,35 @@
 <?php
 
 use App\Constants\Guards;
+use App\Livewire\Student\Dashboard\Dashboard as StudentDashboard;
 use Illuminate\Support\Facades\Route;
-use App\Livewire\Student\Dashboard;
 
-//Student login
+/*
+|--------------------------------------------------------------------------
+| Student Portal Routes
+|--------------------------------------------------------------------------
+|
+| Guard: student
+| Middleware:
+| - auth:student
+| - email.verified:student
+|
+| All routes are:
+| - Prefixed with /student
+| - Named student.*
+|
+*/
 
-// Student Dashboard Routes
-Route::middleware([
-    'auth:' . Guards::STUDENT,
-    'email.verified:' . Guards::STUDENT,
-    ])->prefix('student')->as('student.')->group(function () {
+Route::prefix(Guards::STUDENT)
+    ->as(Guards::STUDENT . '.')
+    ->middleware([
+        'auth:' . Guards::STUDENT,
+        'email.verified:' . Guards::STUDENT,
+    ])
+    ->group(function () {
 
-    // Route::get('/dashboard', [App\Http\Controllers\Student\StudentDashboardController::class, 'index'])->name('dashboard.index');
-    Route::get('/dashboard', Dashboard::class)->name('dashboard');
-});
+        Route::get('/dashboard', StudentDashboard::class)
+            ->name('dashboard');
 
+        // Future student routes go here
+    });

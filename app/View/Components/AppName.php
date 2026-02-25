@@ -2,24 +2,24 @@
 
 namespace App\View\Components;
 
-use Closure;
-use Illuminate\View\Component;
 use Illuminate\Contracts\View\View;
+use Illuminate\View\Component;
 
-class AppName extends Component
+final class AppName extends Component
 {
     /**
-     * Create a new component instance.
+     * Short display name (large gradient title).
      */
-    public function __construct()
-    {
-        //
-    }
+    public function __construct(
+        public string $short = 'NKA HUB',
 
-    /**
-     * Get the view / contents that represent the component.
-     */
-    public function render(): View|Closure|string
+        /**
+         * Full institutional name (subtitle badge).
+         */
+        public string $full = 'Negombo Knowledge Academy',
+    ) {}
+
+    public function render(): View
     {
         return view('components.app-name');
     }
