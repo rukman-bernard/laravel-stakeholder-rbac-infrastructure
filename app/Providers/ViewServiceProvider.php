@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\View\Composers\AdminLteLayoutComposer;
 use App\View\Composers\ErrorViewComposer;
+use App\View\Composers\EmailVerificationViewComposer;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -19,6 +20,7 @@ final class ViewServiceProvider extends ServiceProvider
     {
         $this->registerErrorComposers();
         $this->registerLayoutComposers();
+        $this->registerAuthComposers();
     }
 
     /**
@@ -39,5 +41,11 @@ final class ViewServiceProvider extends ServiceProvider
     private function registerLayoutComposers(): void
     {
         View::composer('components.layouts.app', AdminLteLayoutComposer::class);
+    }
+
+
+    private function registerAuthComposers(): void
+    {
+        View::composer('vendor.adminlte.auth.verify',EmailVerificationViewComposer::class);
     }
 }

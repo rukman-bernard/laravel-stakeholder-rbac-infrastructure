@@ -18,54 +18,6 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-if (! function_exists('nka_active_session_guard')) {
-    /**
-     * Return the first authenticated guard from the configured session guards.
-     *
-     * Notes:
-     * - Uses Guards::session() as the single source of truth
-     * - Returns null when no session guard is authenticated
-     */
-    function nka_active_session_guard(): ?string
-    {
-        foreach (Guards::session() as $guard) {
-            if (Auth::guard($guard)->check()) {
-                return $guard;
-            }
-        }
-
-        return null;
-    }
-}
-
-if (! function_exists('nka_verification_resend_route_name')) {
-    /**
-     * Resolve the email verification resend route name for the current session guard.
-     *
-     * Convention:
-     * - web      => verification.resend
-     * - student  => student.verification.resend
-     * - employer => employer.verification.resend
-     *
-     * Safety:
-     * - If the guard-specific route doesn't exist, falls back to web.
-     */
-    function nka_verification_resend_route_name(): string
-    {
-        $guard = nka_active_session_guard();
-
-        // Default to web when no guard is active or when web is active
-        if (! $guard || $guard === Guards::WEB) {
-            return 'verification.resend';
-        }
-
-        $routeName = "{$guard}.verification.resend";
-
-        return Route::has($routeName)
-            ? $routeName
-            : 'verification.resend';
-    }
-}
 
 if (! function_exists('nka_auth_debug')) {
     /**
