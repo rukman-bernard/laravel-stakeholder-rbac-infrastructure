@@ -64,7 +64,7 @@
 {{-- Register --}}
 <div class="text-center mt-3">
     <a href="{{ route($guard . '.register') }}">
-        Create Account?
+        Register a new membership
     </a>
 </div>
 @endsection

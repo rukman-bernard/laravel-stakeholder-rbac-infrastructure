@@ -84,7 +84,7 @@
     </div>
 
     <button type="submit" class="btn btn-primary btn-block">
-        Create Account
+        Register
     </button>
 </form>
 
