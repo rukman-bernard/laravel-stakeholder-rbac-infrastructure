@@ -238,11 +238,11 @@ Zenodo DOI: Pending (will be assigned upon Zenodo release)
 
 ```bibtex
 @software{bernard_laravel_rbac_infrastructure_2026,
-  author  = {Bernard, Rukman},
-  title   = {Laravel Stakeholder RBAC Infrastructure Artefact},
-  year    = {2026},
-  doi     = {To be assigned},
-  url     = {https://github.com/<repository>}
+  author    = {Bernard, Rukman},
+  title     = {Laravel Stakeholder RBAC Infrastructure Artefact},
+  year      = {2026},
+  publisher = {Zenodo},
+  url       = {https://github.com/rukman-bernard/laravel-stakeholder-rbac-infrastructure}
 }
 ```
 

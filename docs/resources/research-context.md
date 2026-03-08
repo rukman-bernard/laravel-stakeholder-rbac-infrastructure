@@ -101,6 +101,10 @@ The repository therefore concentrates on:
 
 While the broader research programme explores domain modelling and academic system design, this repository provides the **generalised infrastructure components** that can be reused across Laravel applications beyond the original SIS prototype.
 
+The source code for the reusable infrastructure artefact is available in the public repository:
+
+**GitHub Repository**  
+https://github.com/rukman-bernard/laravel-stakeholder-rbac-infrastructure
 ---
 
 # Research Lineage

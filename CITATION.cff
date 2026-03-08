@@ -29,8 +29,10 @@ keywords:
 
 license: MIT
 
-repository-code: "https://github.com/<your-username>/<your-repository-name>"
-url: "https://github.com/<your-username>/<your-repository-name>"
+repository-code: "https://github.com/rukman-bernard/laravel-stakeholder-rbac-infrastructure"
+url: "https://github.com/rukman-bernard/laravel-stakeholder-rbac-infrastructure"
+
+date-released: 2026-03-08
 
 preferred-citation:
   type: software
@@ -39,4 +41,26 @@ preferred-citation:
       given-names: Rukman
       orcid: "https://orcid.org/0009-0001-2737-8367"
   title: "Laravel Stakeholder RBAC Infrastructure Artefact"
-  url: "https://github.com/<your-username>/<your-repository-name>"
+  url: "https://github.com/rukman-bernard/laravel-stakeholder-rbac-infrastructure"
+
+references:
+  - type: article
+    authors:
+      - family-names: Bernard
+        given-names: Rukman
+    title: "Practical Multi-Guard RBAC in Laravel 11 with Spatie Permissions and Livewire"
+    doi: "10.5281/zenodo.17127207"
+
+  - type: article
+    authors:
+      - family-names: Bernard
+        given-names: Rukman
+    title: "Designing a UK-Aligned Student Information System: A Design-Science Prototype for a Hypothetical Institute (NKA)"
+    doi: "10.5281/zenodo.17075060"
+
+  - type: article
+    authors:
+      - family-names: Bernard
+        given-names: Rukman
+    title: "United Kingdom Higher Education Levels, Awards, and Regulatory Oversight for Transnational Delivery with Sri Lankan Partners"
+    doi: "10.5281/zenodo.17738909"

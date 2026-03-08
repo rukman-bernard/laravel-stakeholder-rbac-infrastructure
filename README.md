@@ -51,7 +51,7 @@ docker compose exec laravel composer install
 docker compose exec laravel php artisan key:generate --force
 docker compose exec laravel php artisan storage:link
 docker compose exec laravel php artisan migrate --seed
-````
+```
 
 ---
 ## Access points
@@ -252,6 +252,10 @@ The repository therefore functions as a **reproducible research artefact** suppo
 For detailed research background see:
 
 `docs/resources/research-context.md`
+
+The source code for the infrastructure artefact is available at:
+
+https://github.com/rukman-bernard/laravel-stakeholder-rbac-infrastructure
 
 ---
 
