@@ -20,15 +20,15 @@ Although the reference implementation is evaluated in an academic systems contex
 
 Detailed architecture and operational documentation is available in:
 
-docs/
+`docs/`
 
 Additional engineering notes and runtime verification materials are located in:
 
-docs-supplementary/
+`docs-supplementary/`
 
 Start with:
 
-docs/README.md
+`docs/README.md`
 
 ---
 
@@ -231,7 +231,7 @@ This structure enables:
 
 Operational verification procedures for Redis, container services, and runtime configuration are documented in:
 
-docs-supplementary/runtime-evidence/docker-services.md
+`docs-supplementary/runtime-evidence/docker-services.md`
 
 These documents include CLI-level verification procedures used during system construction.
 
@@ -251,7 +251,7 @@ The repository therefore functions as a **reproducible research artefact** suppo
 
 For detailed research background see:
 
-docs/resources/research-context.md
+`docs/resources/research-context.md`
 
 ---
 
