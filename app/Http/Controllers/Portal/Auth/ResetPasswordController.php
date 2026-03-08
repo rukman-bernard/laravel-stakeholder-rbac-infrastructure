@@ -34,7 +34,7 @@ class ResetPasswordController extends Controller
      */
     protected function resolvedGuard(Request $request): string
     {
-        $allowed = $this->guardResolver->configuredSessionGuardsInPriorityOrder();
+        $allowed = $this->guardResolver->configuredSessionGuardsInResolutionOrder();
 
         // 1) explicit (POST hidden input or query string)
         $guard = $request->input('guard') ?? $request->query('guard');

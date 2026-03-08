@@ -1,155 +1,195 @@
-# NKA Academic Management System (NKA-AMS)
+# Laravel Stakeholder RBAC Infrastructure Artefact
 
-**A Dockerised academic management platform built with Laravel 11 and a multi-guard RBAC architecture.**
+A Dockerised **Laravel 11 infrastructure** demonstrating:
+
+- multi-guard authentication  
+- role-based access control (RBAC)  
+- deterministic guard resolution  
+- stakeholder-aware dashboard routing  
+
+This repository serves as:
+
+- a **working Laravel infrastructure implementation**, and  
+- a **reference technical artefact** supporting associated academic research.
+
+Although the reference implementation is evaluated in an academic systems context, the infrastructure itself is **domain-agnostic** and reusable in any system that requires stakeholder-aware authentication and authorisation.
 
 ---
 
-## Quick start (Docker)
+## Documentation
+
+Detailed architecture and operational documentation is available in:
+
+docs/
+
+Additional engineering notes and runtime verification materials are located in:
+
+docs-supplementary/
+
+Start with:
+
+docs/README.md
+
+---
+
+## Quick Start (Docker)
 
 ### Prerequisites
-- Docker + Docker Compose v2
 
-### First run (fresh clone)
-The system can be instantiated reproducibly via Docker using the following procedure.
+- Docker  
+- Docker Compose v2  
 
+---
+
+## First Run (Fresh Clone)
+
+The system can be instantiated reproducibly using Docker.
 ```bash
-cp .env.example .env    # optional: entrypoint will auto-create .env if missing
+cp .env.example .env
 docker compose up -d --build
 docker compose exec laravel composer install
 docker compose exec laravel php artisan key:generate --force
 docker compose exec laravel php artisan storage:link
 docker compose exec laravel php artisan migrate --seed
-```
+````
 
-> **Dependency Storage Note**
->
-> - PHP dependencies (`vendor/`) are installed into the project directory via the Laravel container.
-> - Node dependencies (`node_modules/`) are stored in a Docker named volume to keep the repository clean and improve performance.
-
-
-For a detailed explanation of the Docker runtime lifecycle, entrypoint behaviour, bind-mount implications, and Composer installation strategy, see:
-
-[Docker Setup Documentation](./docs/docker-setup.md)
-
-### Access points
+---
+## Access points
 | Service     | URL                     |
 | ----------- | ----------------------- |
 | Application | `http://localhost:8000` |
 | phpMyAdmin  | `http://localhost:8080` |
-> All services communicate via Docker internal networking. No internal service relies on `localhost`.
 
-***
-## 1. System Overview
+All containers communicate through Docker's internal network.
 
-The **NKA Academic Management System (NKA-AMS)** is a Laravel-based web application designed to support structured academic administration workflows within higher education and vocational training environments.
+Internal services never rely on `localhost`.
 
-The system is engineered around a **multi-stakeholder architecture** and emphasises:
+---
 
-* role and permission-based access control (RBAC)
+## Infrastructure Overview
 
-* guard-level authentication separation
+This repository provides a reusable Laravel infrastructure baseline for systems that require:
 
-* centralised session management
+* multi-guard authentication
 
-* reproducible containerised environments
+* role-based access control (RBAC)
 
-* documentation-driven engineering discipline
+* deterministic guard resolution
 
-This repository represents the **engineering baseline** of the system and serves as the foundation for requirement-driven functional expansion.
+* single-session enforcement
 
-***
+* stakeholder-aware dashboard routing
 
-## 2. Architectural Principles
+* containerised reproducibility
 
-The system is designed according to the following principles:
+* documentation-driven engineering practices
+
+The infrastructure is demonstrated through a reference implementation originally developed in the context of an academic management system, but the architectural patterns are intended for broader reuse.
+
+---
+
+## Architectural Principles
 
 ### Separation of Concerns
 
 Authentication, session storage, caching, queue handling, and database persistence are isolated at the infrastructure level.
 
+---
+
 ### Stateless Application Layer
 
-The Laravel container is stateless in order to ensure horizontal scalability and container restart safety.
+The Laravel container is designed to be stateless to support horizontal scalability and container restart safety.
+
+---
 
 ### Deterministic Multi-Guard Authentication
 
-Each stakeholder type operates under a dedicated guard with explicit session and access boundaries.
+Each stakeholder type operates under a dedicated guard with explicit authentication and access boundaries.
+
+---
+
+### Single Active Authentication Context
+
+The infrastructure enforces a single active authentication context per browser session.
+
+---
 
 ### Infrastructure Reproducibility
 
-Docker and Docker Compose guarantee environment parity across development machines.
+Docker and Docker Compose provide a reproducible runtime environment across development machines.
+
+---
 
 ### Documentation-First Development
 
-Architectural decisions are formalised and versioned alongside code changes.
+Architectural decisions and implementation details are documented alongside the codebase.
 
 ---
-## 3. Technical Stack
-| Layer                          | Technology                                           |
-| ------------------------------ | ---------------------------------------------------- |
-| Framework                      | Laravel 11 (PHP 8.2)                                 |
+
+## Technical Stack
+| Layer | Technology |
+|-------|------------|
+| Framework | Laravel 11 (PHP 8.2) |
 | Authentication & Authorisation | Multi-guard architecture + Spatie Laravel Permission |
-| UI Framework                   | AdminLTE                                             |
-| Frontend Tooling               | Vite + Node.js                                       |
-| Database                       | MariaDB (Dockerised)                                 |
-| State Layer                    | Redis (via phpredis extension for high-performance state transport)|
-| Environment                    | Docker & Docker Compose                              |
-| Testing                        | Isolated environment via `.env.testing`              |
+| UI Framework | AdminLTE 3|
+| Frontend Tooling | Vite + Node.js |
+| Database | MariaDB (Dockerised) |
+| State Layer | Redis (phpredis extension) |
+| Environment | Docker + Docker Compose |
 
----
-## 4. Development Environment (Docker)
+## Development Environment
 
-The system runs in a fully containerised development environment.
+The system runs inside a fully containerised development environment.
 
 ### Core Services
 
-* **Laravel Application Container** (PHP runtime)
+* Laravel application container (PHP runtime)
 
-* **Nginx** (HTTP server)
+* Nginx (HTTP server)
 
-* **MariaDB** (persistent data)
+* MariaDB (persistent data storage)
 
-* **Redis** (state layer)
+* Redis (state management)
 
-* **Node / Vite** (asset compilation)
+* Node / Vite (asset compilation)
 
-* **phpMyAdmin** (optional development utility)
+* phpMyAdmin (optional development utility)
 
-### Start the environment
+Start the environment:
 ```bash
 docker compose up -d --build
 ```
 ---
-## 5. Environment Configuration
 
-The project uses structured environment separation:
-| File           | Purpose                                         |
-| -------------- | ----------------------------------------------- |
-| `.env`         | Local development configuration (not committed) |
-| `.env.example` | Configuration template                          |
-| `.env.testing` | Isolated testing configuration                  |
+## Environment Configuration
+| File | Purpose |
+|------|---------|
+| .env | Local development configuration |
+| .env.example | Configuration template |
 
-Sensitive values (keys, credentials, secrets) are excluded from version control.
+Sensitive values are excluded from version control.
 
-***
-## 6. Redis State Architecture
+---
 
-Redis functions as the centralised state layer of the system and is responsible for:
+# Redis State Architecture
+
+Redis functions as the **centralised state layer** responsible for:
 
 * HTTP session storage
 
 * application caching
 
-* queue transport backend
+* queue transport
 
-To ensure isolation and predictability, Redis uses dedicated logical databases:
+To ensure predictable behaviour, Redis uses separate logical databases.
+
 | Function | Redis DB |
-| -------- | -------- |
-| Sessions | DB 0     |
-| Cache    | DB 1     |
-| Queue    | DB 2     |
+|----------|----------|
+| Sessions | DB 0 |
+| Cache | DB 1 |
+| Queue | DB 2 |
 
-Key characteristics:
+Key design characteristics:
 
 * dedicated cache key prefix (`CACHE_PREFIX`)
 
@@ -157,100 +197,66 @@ Key characteristics:
 
 * queue lists stored as `queues:<queue-name>`
 
-* no global Redis prefix at connection level
-
-* Docker service name used as Redis hostname (no internal localhost coupling)
+* Docker service name `redis` used as Redis hostname
 
 This structure enables:
 
-* horizontal scalability
+* deterministic queue processing
+
+* container restart safety
+
+* key collision prevention
 
 * cross-container session consistency
 
-* deterministic queue processing
+---
 
-* key-collision prevention
+# Repository Structure
 
-Redis usage can be independently verified via CLI-level inspection.
-
-***
-## 7. Repository Structure (High-Level)
-| Directory    | Purpose                                   |
-| ------------ | ----------------------------------------- |
-| `app/`       | Core application logic                    |
-| `config/`    | Framework and architectural configuration |
-| `database/`  | Migrations and seeders                    |
-| `docker/`    | Container definitions and scripts         |
-| `resources/` | Views and frontend assets                 |
-| `routes/`    | Route definitions                         |
-| `storage/`   | Logs, cache, runtime data                 |
+| Directory | Purpose |
+|-----------|---------|
+| app/ | Core application logic |
+| config/ | Framework configuration |
+| database/ | Migrations and seeders |
+| docker/ | Container configuration |
+| resources/ | Views and frontend assets |
+| routes/ | Route definitions |
+| storage/ | Logs and runtime files |
+| docs/ | System architecture documentation |
+| docs-supplementary/ | Engineering notes and runtime evidence |
 
 ---
-## 8. Versioning Strategy
 
-The repository follows a milestone-based versioning model.
+# Runtime Verification
 
-The current baseline release establishes:
+Operational verification procedures for Redis, container services, and runtime configuration are documented in:
 
-* multi-guard authentication structure
+docs-supplementary/runtime-evidence/docker-services.md
 
-* Redis-backed state management
+These documents include CLI-level verification procedures used during system construction.
 
-* Dockerised environment reproducibility
+---
 
-* architectural documentation alignment
+# Research Context
 
-Functional modules are introduced only after formalised requirement validation.
+This repository accompanies research exploring:
 
-***
+* multi-guard RBAC architecture in Laravel
 
-## 9. System Integrity Guarantees
+* stakeholder-aware infrastructure design
 
-The architecture is designed to provide:
+* reusable authentication and authorisation patterns for domain-driven systems
 
-* single-session enforcement consistency
+The repository therefore functions as a **reproducible research artefact** supporting architectural evaluation and further extension.
 
-* container restart safety (no session loss)
+For detailed research background see:
 
-* externalised persistent state
+docs/resources/research-context.md
 
-* infrastructure-layer separation of responsibilities
+---
 
-This design supports safe scaling without architectural modification.
+# License
 
-***
+This project is licensed under the **MIT License**.
 
-## 10. Infrastructure Verification
-
-For detailed Redis verification procedures (Cache / Queue / Session), including CLI-based proof steps, see:
-
-* [Docker Services – Redis Verification](./docs/docker-services.md#redis-verification)
-
-This section documents how to:
-
-* verify Redis cache storage (DB 1),
-
-* verify Redis queue processing (DB 2),
-
-* verify Redis session storage (DB 0),
-
-* confirm prefix behaviour and configuration alignment.
-
-***
-
-## 11. Academic & Ethical Statement
-
-This system is built using **Laravel**, an open-source framework licensed under the MIT License.
-
-Laravel is used as enabling infrastructure.\
-All architectural decisions, design patterns, configuration logic, and implementation strategies are authored and reviewed by the project owner.
-
-Tooling assistance supports — but does not replace — human-directed engineering judgement.
-
-***
-
-## 12. License Status
-
-This repository is currently maintained as a **research artefact**.
-
-Public licensing terms will be defined at the time of formal publication.
+See the `LICENSE` file for details.

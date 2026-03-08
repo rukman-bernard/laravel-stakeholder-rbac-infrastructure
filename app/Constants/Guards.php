@@ -28,7 +28,7 @@ namespace App\Constants;
  *     auth: implode(',', Guards::session())
  *
  * - Middleware:
- *     Guards::priority()      // multi-guard resolution
+ *     Guards::resolutionOrder()  // deterministic guard resolution
  *     Guards::isPortal($g)    // portal-specific behaviour
  *
  * - UI / Logs:
@@ -73,7 +73,7 @@ final class Guards
      * Preferred resolution order for multi-guard auth:
      * "first authenticated guard wins".
      */
-    private const PRIORITY = self::SESSION_GUARDS;
+    private const RESOLUTION_ORDER = self::SESSION_GUARDS;
 
     /**
      * Human-readable labels for each guard.
@@ -125,13 +125,14 @@ final class Guards
     }
 
     /**
-     * Return guard priority for deterministic multi-guard resolution.
+     * Return guard resolution order for deterministic multi-guard authentication.
      *
-     * The first authenticated guard in this list is treated as active.
+     * Guards are evaluated in this order.
+     * The first authenticated guard is treated as the active context.
      */
-    public static function priority(): array
+    public static function resolutionOrder(): array
     {
-        return self::PRIORITY;
+        return self::RESOLUTION_ORDER;
     }
 
     /**

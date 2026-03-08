@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 | Sysadmin Portal Routes
 |--------------------------------------------------------------------------
 |
-| Guard: web (staff users)
+| Guard: web (internal users)
 | Role:  sysadmin
 |
 | Middleware:

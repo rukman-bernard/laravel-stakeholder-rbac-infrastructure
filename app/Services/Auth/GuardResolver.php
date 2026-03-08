@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Auth;
 final class GuardResolver
 {
     /**
-     * Detect the first authenticated guard from a set of guards.
+     *
+     * Detect the active guard by evaluating guards in deterministic resolution order.
+     * The first authenticated guard is treated as active.
      *
      * @param array<string>|null $guards
      */
@@ -56,7 +58,7 @@ final class GuardResolver
     private function normalizeGuards(?array $guards): array
     {
         if ($guards === null || $guards === []) {
-            return $this->configuredSessionGuardsInPriorityOrder();
+            return $this->configuredSessionGuardsInResolutionOrder();
         }
 
         return collect($guards)
@@ -69,11 +71,11 @@ final class GuardResolver
     }
 
     /**
-     * Session guards configured in auth.php, returned in Guards::priority() order.
+     * Session guards configured in auth.php, returned in Guards::resolutionOrder() order.
      *
      * @return array<string>
      */
-    public function configuredSessionGuardsInPriorityOrder(): array
+    public function configuredSessionGuardsInResolutionOrder(): array
     {
         $configuredSession = collect(config('auth.guards', []))
             ->filter(fn ($g) => ($g['driver'] ?? null) === 'session')
@@ -84,11 +86,11 @@ final class GuardResolver
         // Only allow session guards known by your system AND configured in auth.php
         $base = array_values(array_intersect(Guards::session(), $configuredSession));
 
-        // Priority from Guards (single source of truth)
-        $priority = array_values(array_intersect(Guards::priority(), $base));
-        $remaining = array_values(array_diff($base, $priority));
+        // Resolution order from Guards (single source of truth)
+        $ordered = array_values(array_intersect(Guards::resolutionOrder(), $base));
+        $remaining = array_values(array_diff($base, $ordered));
 
-        return array_values(array_merge($priority, $remaining));
+        return array_values(array_merge($ordered, $remaining));
     }
 
     private function isGuardConfigured(string $guard): bool

@@ -54,12 +54,12 @@ return [
             'labels' => [
                 'student'  => 'NKA Student',
                 'employer' => 'NKA Employer',
-                'web'      => 'NKA Staff',
+                'web'      => 'NKA Internal User',
             ],
             'subjects' => [
                 'student'  => 'Reset Your NKA Student Account Password',
                 'employer' => 'Reset Your NKA Employer Account Password',
-                'web'      => 'Reset Your NKA Staff Account Password',
+                'web'      => 'Reset Your NKA Internal User Account Password',
             ],
         ],
     ],
@@ -73,7 +73,7 @@ return [
 
         // Theme/skin asset mapping per guard (paths are project-specific)
         'skins' => [
-            'web'      => '', // staff uses default AdminLTE styles
+            'web'      => '', // Internal users use default AdminLTE styles
             'student'  => 'resources/scss/skins/student/student.scss',
             'employer' => 'resources/css/skins/employer.css',
         ],

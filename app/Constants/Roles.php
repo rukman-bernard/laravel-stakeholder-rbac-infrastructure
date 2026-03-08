@@ -18,7 +18,7 @@ namespace App\Constants;
 final class Roles
 {
     // =====================================================================
-    // Web-guard roles (staff)
+    // Web-guard roles (internal user)
     // =====================================================================
 
     public const SYSTEM_ADMIN = 'sysadmin';

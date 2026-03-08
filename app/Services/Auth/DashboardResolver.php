@@ -68,8 +68,8 @@ final class DashboardResolver
      * Resolve highest priority role for a user under a given guard.
      *
      * Priority source:
-     * - config('nka.dashboard_role_priority.<guard>') (explicit order)
-     * - fallback: alphabetical by role key
+     * - config('nka.auth.dashboard_role_priority.<guard>') (explicit order)
+     * - fallback: deterministic alphabetical order (case-insensitive)
      */
     public function highestPriorityRole(string $guard, mixed $user): ?string
     {
@@ -110,7 +110,7 @@ final class DashboardResolver
      */
     private function normalizedPriorityList(string $guard): Collection
     {
-        return collect(config("nka.dashboard_role_priority.$guard", []))
+        return collect(config("nka.auth.dashboard_role_priority.$guard", []))
             ->filter(fn ($r) => is_string($r) && $r !== '')
             ->map(fn (string $r) => Str::lower(trim($r)))
             ->values();

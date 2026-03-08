@@ -19,7 +19,7 @@ final class AdminLTESettingsService
      * Apply AdminLTE runtime configuration based on the active guard (and role where relevant).
      *
      * Design rules:
-     * - web guard (staff) uses role-aware dashboard resolution
+     * - web guard (internal user) uses role-aware dashboard resolution
      * - non-web portals use topnav layout + guard label
      * - dashboard URL is always resolved through DashboardResolver (no helpers)
      */
@@ -32,7 +32,7 @@ final class AdminLTESettingsService
             return;
         }
 
-        // 1) Staff portal (web): role-aware title + dashboard
+        // 1) Internal user portal (web): role-aware title + dashboard
         if ($resolvedGuard === Guards::WEB) {
             $roleKey = $user ? $this->dashboardResolver->highestPriorityRole($resolvedGuard, $user) : null;
 
@@ -107,13 +107,13 @@ final class AdminLTESettingsService
     }
 
     /**
-     * Translate the resolved staff "role key" into a human label for the UI title postfix.
+     * Translate the resolved internal user "role key" into a human label for the UI title postfix.
      * If no role is available, fall back to a safe label.
      */
     private function labelForWebUser(?string $roleKey): string
     {
         if (! $roleKey) {
-            return 'Staff';
+            return 'Internal User';
         }
 
         // Roles::label() exists in your project, but keeping this method isolated

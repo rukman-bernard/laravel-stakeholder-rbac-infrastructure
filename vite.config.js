@@ -32,10 +32,8 @@ export default defineConfig({
       input: [
         'resources/css/app.css', //Adminlte default styles
         'resources/js/app.js',  //Adminlte default js
-        'resources/js/web/misc.js',  //This contains the custom js for web guard
-        'resources/css/skins/student.css',     
+        'resources/js/shared/library.js',  //This contains the shared custom js
         'resources/css/skins/employer.css',     
-        'resources/css/skins/testuser.css',     
         'resources/scss/skins/student/student.scss',
       ],
       refresh: true,

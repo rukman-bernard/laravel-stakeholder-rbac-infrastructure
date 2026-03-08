@@ -29,7 +29,7 @@ class ForgotPasswordController extends Controller
      */
     protected function resolvedGuard(Request $request): string
     {
-        $allowed = $this->guardResolver->configuredSessionGuardsInPriorityOrder();
+        $allowed = $this->guardResolver->configuredSessionGuardsInResolutionOrder();
 
         // 1) explicit
         $guard = $request->input('guard') ?? $request->query('guard');

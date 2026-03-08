@@ -21,7 +21,9 @@ final class RedirectLoggedInToDashboard
      * If a session-authenticated user hits a guest-only page (e.g., login),
      * redirect them to the correct dashboard for their active guard/role.
      *
-     * This supports the single-session model: first authenticated guard (by priority) wins.
+     * This supports the single-session model:
+     * guards are evaluated in deterministic resolution order,
+     * and the first authenticated guard is treated as active.
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -30,7 +32,7 @@ final class RedirectLoggedInToDashboard
             return $next($request);
         }
 
-        foreach ($this->guardResolver->configuredSessionGuardsInPriorityOrder() as $guard) {
+        foreach ($this->guardResolver->configuredSessionGuardsInResolutionOrder() as $guard) {
             $auth = Auth::guard($guard);
 
             if ($auth->check()) {

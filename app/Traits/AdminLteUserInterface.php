@@ -29,9 +29,9 @@ trait AdminLteUserInterface
     /**
      * Return a human-readable label for the AdminLTE user menu.
      *
-     * Priority:
-     * 1) Role label (when Spatie roles exist)
-     * 2) Guard label (student/employer/web, etc.)
+     * Deterministic resolution:
+     * - Uses role label when available (Spatie roles)
+     * - Otherwise uses the active guard label
      */
     public function getPrimaryRoleLabel(): string
     {

@@ -1,0 +1,42 @@
+cff-version: 1.2.0
+title: "Laravel Stakeholder RBAC Infrastructure Artefact"
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
+
+authors:
+  - family-names: Bernard
+    given-names: Rukman
+    orcid: "https://orcid.org/0009-0001-2737-8367"
+
+abstract: >
+  A reproducible Laravel infrastructure artefact demonstrating multi-guard
+  authentication, role-based access control (RBAC), deterministic guard
+  resolution, stakeholder-aware dashboard routing, and containerised runtime
+  reproducibility. The artefact provides a reusable infrastructure foundation
+  for multi-stakeholder applications requiring guard-aware authentication and
+  authorisation patterns.
+
+keywords:
+  - Laravel
+  - RBAC
+  - multi-guard authentication
+  - access control
+  - stakeholder systems
+  - reproducible research software
+  - Docker
+  - AdminLTE
+  - Spatie Permission
+
+license: MIT
+
+repository-code: "https://github.com/<your-username>/<your-repository-name>"
+url: "https://github.com/<your-username>/<your-repository-name>"
+
+preferred-citation:
+  type: software
+  authors:
+    - family-names: Bernard
+      given-names: Rukman
+      orcid: "https://orcid.org/0009-0001-2737-8367"
+  title: "Laravel Stakeholder RBAC Infrastructure Artefact"
+  url: "https://github.com/<your-username>/<your-repository-name>"
