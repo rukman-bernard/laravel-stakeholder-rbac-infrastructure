@@ -107,6 +107,7 @@ While the broader research programme explores domain modelling and academic syst
 
 The relationship between the publications and this artefact can be summarised as follows:
 
+```txt
 Domain Review
 │
 ├─ UK HE Levels, Awards, and Regulatory Oversight for TNE
@@ -122,7 +123,7 @@ Security Infrastructure
 Reusable Software Artefact
 │
 └─ Laravel Stakeholder RBAC Infrastructure Artefact (this repository)
-
+```
 
 ---
 
