@@ -1,4 +1,4 @@
- # Laravel Stakeholder RBAC Infrastructure Artefact
+# Laravel Stakeholder RBAC Infrastructure Artefact Documentation
 
 ## Research Context
 
@@ -12,7 +12,7 @@ For the full research lineage, associated publications, and citation details, se
 
 ## Artefact Overview
 
-This infrastructure artefact provides a minimal but fully functional foundation for stakeholder-aware systems.
+This infrastructure artefact provides a minimal yet fully functional foundation for stakeholder-aware systems.
 
 The architecture focuses on authentication, authorisation, and infrastructure configuration rather than domain-specific academic features.
 
@@ -229,20 +229,22 @@ This allows the system to be reproduced without embedding environment-specific d
 If you use, adapt, or reference this infrastructure in academic work, please cite:
 
 Bernard, R. (2026).  
-_Laravel Stakeholder RBAC Infrastructure Artefact_. Version X.X.  
-Zenodo DOI: Pending (will be assigned upon Zenodo release)
+Laravel Stakeholder RBAC Infrastructure Artefact.  
+Zenodo. https://doi.org/10.5281/zenodo.18910977
 
 ---
 
-## BibTeX
+### BibTeX
+
+### BibTeX
 
 ```bibtex
 @software{bernard_laravel_rbac_infrastructure_2026,
-  author    = {Bernard, Rukman},
-  title     = {Laravel Stakeholder RBAC Infrastructure Artefact},
-  year      = {2026},
-  publisher = {Zenodo},
-  url       = {https://github.com/rukman-bernard/laravel-stakeholder-rbac-infrastructure}
+  author  = {Bernard, Rukman},
+  title   = {Laravel Stakeholder RBAC Infrastructure Artefact},
+  year    = {2026},
+  doi     = {10.5281/zenodo.18910977},
+  url     = {https://github.com/rukman-bernard/laravel-stakeholder-rbac-infrastructure}
 }
 ```
 

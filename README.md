@@ -1,5 +1,11 @@
 # Laravel Stakeholder RBAC Infrastructure Artefact
 
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-black?logo=github)](https://github.com/rukman-bernard/laravel-stakeholder-rbac-infrastructure)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18910977.svg)](https://doi.org/10.5281/zenodo.18910977)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Laravel](https://img.shields.io/badge/Laravel-11-red)
+
+
 A Dockerised **Laravel 11 infrastructure** demonstrating:
 
 - multi-guard authentication  
@@ -13,6 +19,16 @@ This repository serves as:
 - a **reference technical artefact** supporting associated academic research.
 
 Although the reference implementation is evaluated in an academic systems context, the infrastructure itself is **domain-agnostic** and reusable in any system that requires stakeholder-aware authentication and authorisation.
+
+## Citation
+
+If you use this infrastructure artefact in research or academic work, please cite:
+
+Bernard, R. (2026).  
+*Laravel Stakeholder RBAC Infrastructure Artefact*.  
+Zenodo.  
+https://doi.org/10.5281/zenodo.18910977
+
 
 ---
 
@@ -54,7 +70,7 @@ docker compose exec laravel php artisan migrate --seed
 ```
 
 ---
-## Access points
+## Access Points
 | Service     | URL                     |
 | ----------- | ----------------------- |
 | Application | `http://localhost:8000` |
@@ -131,7 +147,7 @@ Architectural decisions and implementation details are documented alongside the 
 |-------|------------|
 | Framework | Laravel 11 (PHP 8.2) |
 | Authentication & Authorisation | Multi-guard architecture + Spatie Laravel Permission |
-| UI Framework | AdminLTE 3|
+| UI Framework | AdminLTE 3 |
 | Frontend Tooling | Vite + Node.js |
 | Database | MariaDB (Dockerised) |
 | State Layer | Redis (phpredis extension) |

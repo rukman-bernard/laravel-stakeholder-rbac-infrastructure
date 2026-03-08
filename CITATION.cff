@@ -2,6 +2,7 @@ cff-version: 1.2.0
 title: "Laravel Stakeholder RBAC Infrastructure Artefact"
 message: "If you use this software, please cite it using the metadata from this file."
 type: software
+doi: 10.5281/zenodo.18910977
 
 authors:
   - family-names: Bernard
@@ -33,6 +34,7 @@ repository-code: "https://github.com/rukman-bernard/laravel-stakeholder-rbac-inf
 url: "https://github.com/rukman-bernard/laravel-stakeholder-rbac-infrastructure"
 
 date-released: 2026-03-08
+version: 1.0.0
 
 preferred-citation:
   type: software
@@ -41,6 +43,7 @@ preferred-citation:
       given-names: Rukman
       orcid: "https://orcid.org/0009-0001-2737-8367"
   title: "Laravel Stakeholder RBAC Infrastructure Artefact"
+  doi: 10.5281/zenodo.18910977
   url: "https://github.com/rukman-bernard/laravel-stakeholder-rbac-infrastructure"
 
 references:
