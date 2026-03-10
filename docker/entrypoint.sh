@@ -40,8 +40,11 @@ mkdir -p \
 # ------------------------------------------------------------
 # Best-effort permissions (bind mounts may limit chmod)
 # ------------------------------------------------------------
-log "Ensuring runtime directories are writable (best-effort)..."
-chmod -R ug+rwX storage bootstrap/cache 2>/dev/null || true
+log "Ensuring runtime directories have consistent permissions (best-effort)..."
+find storage bootstrap/cache -type d -exec chmod 775 {} \; 2>/dev/null || true
+find storage bootstrap/cache -type f -exec chmod 664 {} \; 2>/dev/null || true
+find storage/app/public -type f -exec chmod 644 {} \; 2>/dev/null || true
+
 
 # ------------------------------------------------------------
 # If dependencies are missing, do not run artisan.
