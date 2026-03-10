@@ -1,5 +1,7 @@
 # Laravel Stakeholder RBAC Infrastructure Artefact
 
+The source code is maintained on GitHub and archived on Zenodo to support long-term reproducibility and citation of the associated research artefact.
+
 [![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-black?logo=github)](https://github.com/rukman-bernard/laravel-stakeholder-rbac-infrastructure)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18910977.svg)](https://doi.org/10.5281/zenodo.18910977)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -52,8 +54,8 @@ Start with:
 
 ### Prerequisites
 
-- Docker  
-- Docker Compose v2  
+- Docker Engine
+- Docker Compose v2 (docker compose)
 
 ---
 
@@ -79,6 +81,16 @@ docker compose exec laravel php artisan migrate --seed
 All containers communicate through Docker's internal network.
 
 Internal services never rely on `localhost`.
+
+---
+
+## Development Environment Considerations
+
+The prototype was developed and evaluated using a containerised environment based on Docker and Docker Compose.
+
+During testing it was observed that development environments running Docker Desktop on Windows may exhibit higher request latency due to filesystem synchronisation overhead between the host operating system and container volumes. This behaviour is related to Docker Desktop’s file sharing mechanism rather than the RBAC architecture itself.
+
+When executed in native Linux environments, the infrastructure operates with significantly lower latency and consistent runtime behaviour.
 
 ---
 
@@ -153,6 +165,22 @@ Architectural decisions and implementation details are documented alongside the 
 | State Layer | Redis (phpredis extension) |
 | Environment | Docker + Docker Compose |
 
+---
+
+## Tested Environments
+
+The infrastructure artefact was verified in the following environments:
+
+| Environment | Status |
+|-------------|--------|
+| Linux (Docker Engine) | Verified |
+| Windows 10 / 11 + Docker Desktop | Verified (higher filesystem latency) |
+| PHP 8.2 (containerised) | Verified |
+
+Performance characteristics may vary depending on host filesystem behaviour and container runtime configuration.
+
+---
+
 ## Development Environment
 
 The system runs inside a fully containerised development environment.
@@ -187,7 +215,7 @@ Sensitive values are excluded from version control.
 
 ---
 
-# Redis State Architecture
+## Redis State Architecture
 
 Redis functions as the **centralised state layer** responsible for:
 
@@ -227,7 +255,7 @@ This structure enables:
 
 ---
 
-# Repository Structure
+## Repository Structure
 
 | Directory | Purpose |
 |-----------|---------|
@@ -243,7 +271,7 @@ This structure enables:
 
 ---
 
-# Runtime Verification
+## Runtime Verification
 
 Operational verification procedures for Redis, container services, and runtime configuration are documented in:
 
@@ -253,7 +281,7 @@ These documents include CLI-level verification procedures used during system con
 
 ---
 
-# Research Context
+## Research Context
 
 This repository accompanies research exploring:
 
@@ -269,13 +297,13 @@ For detailed research background see:
 
 `docs/resources/research-context.md`
 
-The source code for the infrastructure artefact is available at:
+The maintained source repository is available at:
 
 https://github.com/rukman-bernard/laravel-stakeholder-rbac-infrastructure
 
 ---
 
-# License
+## License
 
 This project is licensed under the **MIT License**.
 
