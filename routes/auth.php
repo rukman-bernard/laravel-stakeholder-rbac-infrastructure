@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Constants\Guards;
-use App\Http\Controllers\Auth\CommonLogoutController;
+// use App\Http\Controllers\Auth\CommonLogoutController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Portal\Auth\PortalLoginController;
@@ -125,26 +125,3 @@ foreach (Guards::portal() as $guard) {
     });
 }
 
-/*
-|--------------------------------------------------------------------------
-| Session reset page (multi-guard protected)
-|--------------------------------------------------------------------------
-| IMPORTANT:
-| Do NOT put email.verified here, otherwise unverified users can't reach it.
-*/
-Route::view('/auth/reset', 'errors.session-reset')
-    ->middleware([
-        'web',
-        'auth:' . implode(',', Guards::session()),
-    ])
-    ->name('auth.reset');
-
-/*
-|--------------------------------------------------------------------------
-| Logout (multi-guard)
-|--------------------------------------------------------------------------
-| Must stay after other auth routes to override default logout if present.
-*/
-Route::middleware(['auth:' . implode(',', Guards::session())])->group(function () {
-    Route::post('/logout', CommonLogoutController::class)->name('logout');
-});
