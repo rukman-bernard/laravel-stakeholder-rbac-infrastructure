@@ -12,6 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Traits\HasRoles;
+use App\Notifications\GuardAwareVerifyEmailNotification;
 
 class User extends Authenticatable implements CanResetPassword, MustVerifyEmail
 {
@@ -60,16 +61,6 @@ class User extends Authenticatable implements CanResetPassword, MustVerifyEmail
         ];
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Relationships
-    |--------------------------------------------------------------------------
-    */
-
-    public function address()
-    {
-        return $this->morphOne(Address::class, 'addressable');
-    }
 
     /*
     |--------------------------------------------------------------------------
@@ -104,5 +95,10 @@ class User extends Authenticatable implements CanResetPassword, MustVerifyEmail
     public function authGuardName(): string
     {
         return 'web';
+    }
+
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new GuardAwareVerifyEmailNotification());
     }
 }

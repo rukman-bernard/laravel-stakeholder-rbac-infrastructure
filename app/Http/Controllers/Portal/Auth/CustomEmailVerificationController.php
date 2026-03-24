@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Portal\Auth;
 
+use App\Constants\Guards;
 use App\Http\Controllers\Controller;
 use App\Services\Auth\DashboardResolver;
 use App\Services\Auth\GuardResolver;
@@ -10,6 +11,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 class CustomEmailVerificationController extends Controller
 {
@@ -18,25 +20,18 @@ class CustomEmailVerificationController extends Controller
         private readonly DashboardResolver $dashboardResolver,
     ) {}
 
-    /**
-     * Verification notice page.
-     * If the current user is already verified, redirect them away.
-     */
     public function showVerificationNotice()
     {
         ['guard' => $guard, 'user' => $user] = $this->guardResolver->identity();
 
-        // If unauthenticated, show notice (or you could redirect to portal hub)
         if (! $guard || ! $user) {
             return view('vendor.adminlte.auth.verify');
         }
 
-        // If verification not required for this user model, treat as verified
         if (! ($user instanceof MustVerifyEmail)) {
             return $this->redirectToDashboard($guard, $user);
         }
 
-        // Already verified -> go where they intended / dashboard
         if ($user->hasVerifiedEmail()) {
             return $this->redirectToDashboard($guard, $user);
         }
@@ -49,19 +44,17 @@ class CustomEmailVerificationController extends Controller
         return $this->showVerificationNotice();
     }
 
-
     /**
      * Handle the signed verification link.
      */
     public function verify(Request $request, $id, $hash)
     {
-        $guard = $this->guardResolver->detect();
+        $guard = $this->resolveGuardFromVerificationRoute($request);
 
         if (! $guard) {
-            abort(403, 'Unauthenticated.');
+            abort(403, 'Invalid authentication context.');
         }
 
-        // Signed URL validation must happen before trusting parameters
         if (! $request->hasValidSignature()) {
             abort(403, 'Invalid or expired verification link.');
         }
@@ -72,33 +65,31 @@ class CustomEmailVerificationController extends Controller
             abort(403, 'Invalid verification link.');
         }
 
-        // Verify hash matches the user's verification email (Laravel pattern)
         if (! hash_equals(sha1($user->getEmailForVerification()), (string) $hash)) {
             abort(403, 'Invalid verification link.');
         }
 
-        // If already verified, just log in and redirect
-        if ($user->hasVerifiedEmail()) {
+        $justVerified = false;
+
+        if (! $user->hasVerifiedEmail()) {
+            if ($user->markEmailAsVerified()) {
+                event(new Verified($user));
+                $justVerified = true;
+            }
+        }
+
+        $currentGuard = $this->guardResolver->detect();
+
+        if ($currentGuard !== $guard) {
             Auth::guard($guard)->login($user);
-
-            return $this->redirectToDashboard($guard, $user)
-                ->with('message', 'Your email is already verified.');
         }
-
-        // Canonical Laravel method (sets email_verified_at and fires events safely)
-        if ($user->markEmailAsVerified()) {
-            event(new Verified($user));
-        }
-
-        Auth::guard($guard)->login($user);
 
         return $this->redirectToDashboard($guard, $user)
-            ->with('message', 'Your email has been verified successfully.');
+            ->with('message', $justVerified
+                ? 'Your email has been verified successfully.'
+                : 'Your email is already verified.');
     }
 
-    /**
-     * Resend verification email for the currently authenticated user.
-     */
     public function resend(Request $request)
     {
         ['guard' => $guard, 'user' => $user] = $this->guardResolver->identity();
@@ -107,42 +98,61 @@ class CustomEmailVerificationController extends Controller
             abort(403);
         }
 
-        // If this model does not require verification, just redirect
         if (! ($user instanceof MustVerifyEmail)) {
             return $this->redirectToDashboard($guard, $user);
         }
 
-        // Not verified -> resend notification
         if (! $user->hasVerifiedEmail()) {
             $user->sendEmailVerificationNotification();
 
             return back()->with('message', 'A new verification link has been sent to your email address.');
         }
 
-        // Already verified -> go to dashboard
         return $this->redirectToDashboard($guard, $user);
     }
 
     /**
-     * Resolve a user instance based on the guard's configured provider model.
-     * This avoids hardcoding User/Student/Employer models.
+     * Resolve guard from the verification route itself, not from the session.
      */
+    private function resolveGuardFromVerificationRoute(Request $request): ?string
+    {
+        $routeName = $request->route()?->getName();
+
+        if (! is_string($routeName) || $routeName === '') {
+            return null;
+        }
+
+        if ($routeName === 'verification.verify') {
+            return Guards::WEB;
+        }
+
+        foreach (Guards::portal() as $guard) {
+            if (Str::startsWith($routeName, "{$guard}.verification.")) {
+                return $guard;
+            }
+        }
+
+        return null;
+    }
+
     private function resolveUserFromGuardProvider(string $guard, int $id): ?object
     {
         $provider = config("auth.guards.$guard.provider");
-        $model    = $provider ? config("auth.providers.$provider.model") : null;
+        $model = $provider ? config("auth.providers.$provider.model") : null;
 
         if (! is_string($model) || ! class_exists($model)) {
             abort(403, 'Invalid authentication context.');
         }
 
-        return $model::find($id);
+        $user = $model::find($id);
+
+        if (! $user) {
+            abort(403, 'Invalid verification link.');
+        }
+
+        return $user;
     }
 
-    /**
-     * Redirect to intended URL, falling back to a guard/role-specific dashboard.
-     * If dashboard route is missing, fail safe to auth.reset.
-     */
     private function redirectToDashboard(string $guard, $user)
     {
         $role = $this->dashboardResolver->highestPriorityRole($guard, $user);

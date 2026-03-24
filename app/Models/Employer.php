@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
+use App\Notifications\GuardAwareVerifyEmailNotification;
 
 class Employer extends Authenticatable implements CanResetPassword, MustVerifyEmail
 {
@@ -91,4 +92,11 @@ class Employer extends Authenticatable implements CanResetPassword, MustVerifyEm
     {
         return 'employer';
     }
+
+
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new GuardAwareVerifyEmailNotification());
+    }
+    
 }

@@ -49,8 +49,29 @@ return Application::configure(basePath: dirname(__DIR__))
 
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (\Illuminate\Routing\Exceptions\InvalidSignatureException $e, \Illuminate\Http\Request $request) {
+            $guard = \App\Constants\Guards::normalize($request->segment(1));
+
+            if (! $guard || ! \App\Constants\Guards::isPortal($guard)) {
+                $guard = \App\Constants\Guards::WEB;
+            }
+
+            $loginRoute = $guard === \App\Constants\Guards::WEB
+                ? 'login'
+                : "{$guard}.login";
+
+            $resendRoute = $guard === \App\Constants\Guards::WEB
+                ? 'verification.notice'
+                : "{$guard}.verification.notice";
+
+            return response()->view('auth.verification-link-invalid', [
+                'guard' => $guard,
+                'loginRoute' => $loginRoute,
+                'resendNoticeRoute' => $resendRoute,
+            ], 403);
+        });
     })->withCommands([
 
-        ])
+    
+    ])
 ->create();
