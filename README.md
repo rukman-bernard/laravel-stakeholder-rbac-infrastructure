@@ -73,6 +73,7 @@ docker compose exec laravel php artisan migrate --seed
 
 ---
 ## Access Points
+
 | Service     | URL                     |
 | ----------- | ----------------------- |
 | Application | `http://localhost:8000` |
@@ -169,6 +170,7 @@ Architectural decisions and implementation details are documented alongside the 
 ---
 
 ## Technical Stack
+
 | Layer | Technology |
 |-------|------------|
 | Framework | Laravel 11 (PHP 8.2) |
@@ -220,6 +222,7 @@ docker compose up -d --build
 ---
 
 ## Environment Configuration
+
 | File | Purpose |
 |------|---------|
 | .env | Local development configuration |
