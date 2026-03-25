@@ -158,5 +158,9 @@ return [
 
 
 
+    // Expiry time (in minutes) for signed email verification links
+    'verification' => [
+        'expire' => 60, // minutes
+    ],
 
 ];
