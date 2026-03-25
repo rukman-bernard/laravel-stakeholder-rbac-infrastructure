@@ -27,7 +27,7 @@ final class GuardAwareVerifyEmailNotification extends VerifyEmail
 
         return URL::temporarySignedRoute(
             $routeName,
-            Carbon::now()->addMinutes(config('auth.verification.expire', 1)),
+            Carbon::now()->addMinutes(config('auth.verification.expire', 60)),
             [
                 'id'   => $notifiable->getKey(),
                 'hash' => sha1($notifiable->getEmailForVerification()),
