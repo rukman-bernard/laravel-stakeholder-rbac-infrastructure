@@ -12,7 +12,7 @@ For the full research lineage, associated publications, and citation details, se
 
 ## Artefact Overview
 
-This infrastructure artefact provides a minimal yet fully functional foundation for stakeholder-aware systems.
+This infrastructure artefact provides a minimal yet fully functional foundation for stakeholder-aware systems, focusing on authentication, authorisation, and infrastructure configuration.
 
 The architecture focuses on authentication, authorisation, and infrastructure configuration rather than domain-specific academic features.
 
@@ -96,7 +96,7 @@ These notes capture engineering considerations that were encountered while build
 - configuration considerations
 - development-time discoveries
 
-Developer Notes are **informational in nature** and complement the formal architecture and feature documentation. They are included to preserve valuable engineering context for future maintainers.
+Developer Notes are **informational in nature** and complement the formal architecture and feature documentation by preserving practical engineering context. They are included to preserve valuable engineering context for future maintainers.
 
 ---
 
@@ -104,7 +104,8 @@ Developer Notes are **informational in nature** and complement the formal archit
 
 The `features/` section documents implemented infrastructure capabilities, including:
 
-- authentication and guard management  
+- authentication and guard management
+- guard-aware email verification  
 - dashboard resolution  
 - session handling
 - stakeholder-aware theming
@@ -203,7 +204,7 @@ Supplementary engineering material may then be consulted if needed.
 This repository contains the **reference implementation used for research evaluation**.
 
 It is not intended to represent a production-ready institutional deployment.  
-Instead, it provides a **controlled architectural baseline** that demonstrates the infrastructure required to support stakeholder-aware systems.
+Instead, it provides a **controlled architectural baseline** demonstrating the infrastructure required to support stakeholder-aware systems.
 
 Future work may extend this infrastructure with additional domain functionality.
 
@@ -233,8 +234,6 @@ Laravel Stakeholder RBAC Infrastructure Artefact.
 Zenodo. https://doi.org/10.5281/zenodo.18910977
 
 ---
-
-### BibTeX
 
 ### BibTeX
 

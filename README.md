@@ -1,6 +1,6 @@
 # Laravel Stakeholder RBAC Infrastructure Artefact
 
-The source code is maintained on GitHub and archived on Zenodo to support long-term reproducibility and citation of the associated research artefact.
+The source code is maintained on GitHub and archived on Zenodo to support long-term reproducibility, citation, and reference to the associated research artefact.
 
 [![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-black?logo=github)](https://github.com/rukman-bernard/laravel-stakeholder-rbac-infrastructure)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18910977.svg)](https://doi.org/10.5281/zenodo.18910977)
@@ -17,7 +17,7 @@ A Dockerised **Laravel 11 infrastructure** demonstrating:
 
 This repository serves as:
 
-- a **working Laravel infrastructure implementation**, and  
+- a **working Laravel infrastructure implementation** 
 - a **reference technical artefact** supporting associated academic research.
 
 Although the reference implementation is evaluated in an academic systems context, the infrastructure itself is **domain-agnostic** and reusable in any system that requires stakeholder-aware authentication and authorisation.
@@ -98,21 +98,35 @@ When executed in native Linux environments, the infrastructure operates with sig
 
 This repository provides a reusable Laravel infrastructure baseline for systems that require:
 
-* multi-guard authentication
+- multi-guard authentication
 
-* role-based access control (RBAC)
+- role-based access control (RBAC)
 
-* deterministic guard resolution
+- deterministic guard resolution
 
-* single-session enforcement
+- single-session enforcement
 
-* stakeholder-aware dashboard routing
+- stakeholder-aware dashboard routing
 
-* containerised reproducibility
+- containerised reproducibility
 
-* documentation-driven engineering practices
+- documentation-driven engineering practices
 
 The infrastructure is demonstrated through a reference implementation originally developed in the context of an academic management system, but the architectural patterns are intended for broader reuse.
+
+---
+## Guard-Aware Email Verification
+
+The infrastructure includes a guard-aware email verification flow across all stakeholder types.
+
+Key behaviours:
+
+- verification links are generated per guard (`web`, `student`, `employer`)
+- verification is resolved from the route context rather than the current session
+- already verified links are handled safely and predictably
+- expired or invalid verification links are redirected into a recovery-oriented verification flow
+
+This design avoids cross-guard ambiguity and ensures that each stakeholder remains within the correct authentication context throughout the verification lifecycle.
 
 ---
 
@@ -187,17 +201,17 @@ The system runs inside a fully containerised development environment.
 
 ### Core Services
 
-* Laravel application container (PHP runtime)
+- Laravel application container (PHP runtime)
 
-* Nginx (HTTP server)
+- Nginx (HTTP server)
 
-* MariaDB (persistent data storage)
+- MariaDB (persistent data storage)
 
-* Redis (state management)
+- Redis (state management)
 
-* Node / Vite (asset compilation)
+- Node / Vite (asset compilation)
 
-* phpMyAdmin (optional development utility)
+- phpMyAdmin (optional development utility)
 
 Start the environment:
 ```bash
@@ -219,11 +233,11 @@ Sensitive values are excluded from version control.
 
 Redis functions as the **centralised state layer** responsible for:
 
-* HTTP session storage
+- HTTP session storage
 
-* application caching
+- application caching
 
-* queue transport
+- queue transport
 
 To ensure predictable behaviour, Redis uses separate logical databases.
 
@@ -235,23 +249,23 @@ To ensure predictable behaviour, Redis uses separate logical databases.
 
 Key design characteristics:
 
-* dedicated cache key prefix (`CACHE_PREFIX`)
+- dedicated cache key prefix (`CACHE_PREFIX`)
 
-* dedicated session key prefix (`SESSION_PREFIX`)
+- dedicated session key prefix (`SESSION_PREFIX`)
 
-* queue lists stored as `queues:<queue-name>`
+- queue lists stored as `queues:<queue-name>`
 
-* Docker service name `redis` used as Redis hostname
+- Docker service name `redis` used as Redis hostname
 
 This structure enables:
 
-* deterministic queue processing
+- deterministic queue processing
 
-* container restart safety
+- container restart safety
 
-* key collision prevention
+- key collision prevention
 
-* cross-container session consistency
+- cross-container session consistency
 
 ---
 
@@ -285,21 +299,17 @@ These documents include CLI-level verification procedures used during system con
 
 This repository accompanies research exploring:
 
-* multi-guard RBAC architecture in Laravel
+- multi-guard RBAC architecture in Laravel
 
-* stakeholder-aware infrastructure design
+- stakeholder-aware infrastructure design
 
-* reusable authentication and authorisation patterns for domain-driven systems
+- reusable authentication and authorisation patterns for domain-driven systems
 
 The repository therefore functions as a **reproducible research artefact** supporting architectural evaluation and further extension.
 
 For detailed research background see:
 
 `docs/resources/research-context.md`
-
-The maintained source repository is available at:
-
-https://github.com/rukman-bernard/laravel-stakeholder-rbac-infrastructure
 
 ---
 

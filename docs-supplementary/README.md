@@ -4,6 +4,8 @@ This directory contains supplementary technical notes recorded during the develo
 
 These documents are intentionally separated from the core documentation in order to preserve the scope of the formal infrastructure specification while still retaining useful engineering knowledge and operational context.
 
+Recent engineering refinements include improvements to the multi-guard email verification lifecycle, including guard-aware verification link generation, route-based verification resolution, and recovery handling for expired or invalid verification links.
+
 The contents of this directory should therefore be considered **supplementary reference material**, rather than part of the authoritative infrastructure specification.
 
 ---
