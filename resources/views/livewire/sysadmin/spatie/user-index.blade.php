@@ -1,10 +1,10 @@
-
 @php
     use App\Constants\Permissions;
 @endphp
 
 @section('content_header_title', $header_title)
 @section('content_header_subtitle', $subtitle)
+
 <div>
     <div class="card card-primary">
         <div class="card-header">
@@ -17,6 +17,7 @@
                 @endcan
             </div>
         </div>
+
         <div class="card-body">
             <table class="table table-hover">
                 <thead>
@@ -28,33 +29,25 @@
                         <th>Actions</th>
                     </tr>
                 </thead>
+
                 <tbody>
-                        @forelse($users as $user)
+                    @forelse($users as $user)
                         <tr>
+                            <!-- Name -->
                             <td>{{ $user->name }}</td>
+
+                            <!-- Email -->
                             <td>{{ $user->email }}</td>
+
+                            <!-- Roles -->
                             <td>
                                 @foreach($user->roles as $role)
                                     <span class="badge badge-info">{{ $role->name }}</span>
                                 @endforeach
                             </td>
+
+                            <!-- Permissions -->
                             <td>
-                                {{-- <div>
-                                    <strong>Direct Permissions:</strong>
-                                    <ul>
-                                        @foreach($user->permissions as $permission)
-                                            <li>{{ $permission->name }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                                <div>
-                                    <strong>Permissions Through Roles:</strong>
-                                    <ul>
-                                        @foreach($user->getPermissionsViaRoles() as $permission)
-                                            <li>{{ $permission->name }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div> --}}
                                 <div style="max-height: 200px; overflow-y: auto;">
                                     <strong>Direct Permissions:</strong>
                                     <ul>
@@ -63,7 +56,7 @@
                                         @endforeach
                                     </ul>
                                 </div>
-                                
+
                                 <div style="max-height: 200px; overflow-y: auto;">
                                     <strong>Permissions Through Roles:</strong>
                                     <ul>
@@ -72,55 +65,52 @@
                                         @endforeach
                                     </ul>
                                 </div>
-                                
                             </td>
+
+                            <!-- Actions -->
                             <td>
-                                <td>
-                                    <div class="d-flex" style="gap: 5px;">
-                                        @can(Permissions::EDIT_USERS)
-                                            <a href="{{ route('sysadmin.users.edit', $user->id) }}"
-                                               class="btn btn-warning btn-sm">
-                                                Edit
-                                            </a>
-                                        @endcan
+                                <div class="d-flex" style="gap: 5px;">
+                                    @can(Permissions::EDIT_USERS)
+                                        <a href="{{ route('sysadmin.users.edit', $user->id) }}"
+                                           class="btn btn-warning btn-sm">
+                                            Edit
+                                        </a>
+                                    @endcan
 
-                                        @can(Permissions::DELETE_USERS)
-                                            <button
-                                                type="button"
-                                                x-data
-                                                x-on:click="if (confirm('Are you sure?')) { $wire.deleteUser({{ $user->id }}) }"
-                                                class="btn btn-danger btn-sm"
-                                            >
-                                                Delete
-                                            </button>
-                                        @endcan
+                                    @can(Permissions::DELETE_USERS)
+                                        <button
+                                            type="button"
+                                            x-data
+                                            x-on:click="if (confirm('Are you sure?')) { $wire.delete({{ $user->id }}) }"
+                                            class="btn btn-danger btn-sm"
+                                        >
+                                            Delete
+                                        </button>
+                                    @endcan
 
-                                        @can(Permissions::EDIT_USERS)
-                                            <a href="{{ route('sysadmin.users.permissions', $user->id) }}"
-                                               class="btn btn-info btn-sm">
-                                                Permissions
-                                            </a>
-                                        @endcan
-                                    </div>
-                                </td>
+                                    @can(Permissions::EDIT_USERS)
+                                        <a href="{{ route('sysadmin.users.permissions', $user->id) }}"
+                                           class="btn btn-info btn-sm">
+                                            Permissions
+                                        </a>
+                                    @endcan
+                                </div>
                             </td>
                         </tr>
-                        @empty
+
+                    @empty
                         <tr>
                             <td colspan="5">No users found.</td>
                         </tr>
-                        @endforelse
-                 
+                    @endforelse
                 </tbody>
             </table>
         </div>
 
         <div class="card-footer">
             <div class="mt-3">
-                {{ $users->links() }} <!-- Livewire Pagination Links -->
+                {{ $users->links() }}
             </div>
         </div>
     </div>
 </div>
-
-
