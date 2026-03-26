@@ -22,33 +22,59 @@ class RoleForm extends Component
     public $allPermissions = [];
     public $mode = 'create';
 
-    protected $rules = [
-        'name' => 'required|string|min:3|unique:roles,name',
-        'guard_name' => 'required|string',
-        'permissions' => 'array',
-    ];
-
     protected $listeners = [
         'createRole' => 'create',
         'editRole' => 'edit',
     ];
 
+    public function availableGuards(): array
+    {
+        return array_keys(config('auth.guards', []));
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name' => [
+                'required', 'string', 'min:3',
+                Rule::unique('roles')->ignore($this->roleId),
+            ],
+            'guard_name' => [
+                'required',
+                'string',
+                Rule::in($this->availableGuards()),
+            ],
+            'permissions' => 'array',
+        ];
+    }
+
     public function mount(): void
     {
-        $this->allPermissions = Permission::all();
+        $this->loadPermissions();
+    }
+
+    public function updatedGuardName(): void
+    {
+        $this->permissions = []; // reset selected permissions
+        $this->loadPermissions();
+    }
+
+    private function loadPermissions(): void
+    {
+        $this->allPermissions = Permission::where('guard_name', $this->guard_name)->get();
     }
 
     public function create(): void
     {
         $this->authorizePermission(Permissions::CREATE_ROLES, 'You do not have permission to create roles.');
 
-
         $this->reset(['roleId', 'name', 'guard_name', 'permissions']);
+        $this->guard_name = Guards::WEB;
+
+        $this->loadPermissions();
+
         $this->mode = 'create';
-        // $this->dispatch('showModal', 'roleModal');
         $this->dispatch('modal:show', modalId: 'roleModal');
-
-
     }
 
     public function edit(int $id): void
@@ -56,37 +82,31 @@ class RoleForm extends Component
         $this->authorizePermission(Permissions::EDIT_ROLES, 'You do not have permission to edit roles.');
 
         $role = Role::findOrFail($id);
+
         $this->roleId = $role->id;
         $this->name = $role->name;
         $this->guard_name = $role->guard_name;
         $this->permissions = $role->permissions->pluck('name')->toArray();
+
+        $this->loadPermissions();
+
         $this->mode = 'edit';
-        // $this->dispatch('showModal', 'roleModal');
         $this->dispatch('modal:show', modalId: 'roleModal');
     }
 
     public function closeModal(): void
     {
-        // $this->dispatch('hideModal', 'roleModal');
         $this->dispatch('modal:hide', modalId: 'roleModal');
     }
 
     public function save(): void
     {
-        // Save is used for both create + edit.
         $this->authorizePermission(
             $this->roleId ? Permissions::EDIT_ROLES : Permissions::CREATE_ROLES,
             'You do not have permission to save roles.'
         );
 
-        $validated = $this->validate([
-            'name' => [
-                'required', 'string', 'min:3',
-                Rule::unique('roles')->ignore($this->roleId),
-            ],
-            'guard_name' => 'required|string',
-            'permissions' => 'array',
-        ]);
+        $this->validate();
 
         $role = Role::updateOrCreate(
             ['id' => $this->roleId],
@@ -103,6 +123,8 @@ class RoleForm extends Component
 
     public function render()
     {
-        return view('livewire.sysadmin.spatie.role-form');
+        return view('livewire.sysadmin.spatie.role-form', [
+            'guards' => $this->availableGuards(),
+        ]);
     }
 }
