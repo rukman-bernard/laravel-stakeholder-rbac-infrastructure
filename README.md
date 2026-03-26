@@ -17,7 +17,7 @@ A Dockerised **Laravel 11 infrastructure** demonstrating:
 
 This repository serves as:
 
-- a **working Laravel infrastructure implementation** 
+- a **reference Laravel infrastructure implementation** 
 - a **reference technical artefact** supporting associated academic research.
 
 Although the reference implementation is evaluated in an academic systems context, the infrastructure itself is **domain-agnostic** and reusable in any system that requires stakeholder-aware authentication and authorisation.
@@ -81,7 +81,7 @@ docker compose exec laravel php artisan migrate --seed
 
 All containers communicate through Docker's internal network.
 
-Internal services never rely on `localhost`.
+Internal service communication does not rely on `localhost`.
 
 ---
 
@@ -295,6 +295,13 @@ Operational verification procedures for Redis, container services, and runtime c
 `docs-supplementary/runtime-evidence/docker-services.md`
 
 These documents include CLI-level verification procedures used during system construction.
+
+---
+## Engineering Case Studies
+
+As part of ongoing architectural evaluation, the repository includes practical case studies examining RBAC behaviour in real-world scenarios:
+
+- [Redis-backed RBAC Evaluation](docs/case-studies/redis-rbac-evaluation.md)
 
 ---
 

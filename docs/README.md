@@ -14,7 +14,7 @@ For the full research lineage, associated publications, and citation details, se
 
 This infrastructure artefact provides a minimal yet fully functional foundation for stakeholder-aware systems, focusing on authentication, authorisation, and infrastructure configuration.
 
-The architecture focuses on authentication, authorisation, and infrastructure configuration rather than domain-specific academic features.
+It is intentionally designed to emphasise infrastructure concerns rather than domain-specific academic features.
 
 ```mermaid
 flowchart TB
@@ -89,7 +89,7 @@ Each ADR records:
 
 The `developer-notes/` section contains practical observations and implementation insights recorded during development.
 
-These notes capture engineering considerations that were encountered while building the infrastructure, including:
+These notes capture practical engineering observations encountered during development, including:
 
 - implementation lessons
 - framework integration challenges
@@ -221,7 +221,14 @@ is available in:
 `/docs/operations/environments.md`
 
 
-This allows the system to be reproduced without embedding environment-specific details into the architecture documentation.
+This allows the system to be reproduced without introducing environment-specific details into the architecture documentation.
+
+---
+## Case Studies
+
+The repository includes targeted case studies examining RBAC and authentication behaviour in real-world scenarios:
+
+- [Redis-backed RBAC Evaluation](case-studies/redis-rbac-evaluation.md)
 
 ---
 
