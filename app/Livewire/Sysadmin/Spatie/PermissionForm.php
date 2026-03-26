@@ -5,6 +5,7 @@ namespace App\Livewire\Sysadmin\Spatie;
 use App\Constants\Guards;
 use App\Constants\Permissions;
 use App\Traits\AuthorizesWithPermissions;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Spatie\Permission\Models\Permission;
 
@@ -25,8 +26,17 @@ final class PermissionForm extends Component
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'guard_name' => ['required', 'string', 'max:255'],
+            'guard_name' => [
+                'required',
+                'string',
+                Rule::in($this->availableGuards()),
+            ],
         ];
+    }
+
+    public function availableGuards(): array
+    {
+        return array_keys(config('auth.guards', []));
     }
 
     public function open(string $mode, ?int $id = null): void
@@ -40,6 +50,7 @@ final class PermissionForm extends Component
         $this->reset(['permissionId', 'name', 'guard_name', 'mode']);
 
         $this->mode = $mode;
+        $this->guard_name = Guards::WEB;
 
         if ($mode === 'edit' && $id) {
             $permission = Permission::query()->findOrFail($id);
@@ -81,6 +92,8 @@ final class PermissionForm extends Component
 
     public function render()
     {
-        return view('livewire.sysadmin.spatie.permission-form');
+        return view('livewire.sysadmin.spatie.permission-form', [
+            'guards' => $this->availableGuards(),
+        ]);
     }
 }
