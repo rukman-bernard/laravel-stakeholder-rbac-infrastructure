@@ -1,4 +1,3 @@
-
 <div>
     <!-- Modal -->
     <div wire:ignore.self class="modal fade" id="permissionModal" tabindex="-1" aria-labelledby="permissionModalLabel" aria-hidden="true">
@@ -28,7 +27,11 @@
 
                             <div class="form-group">
                                 <label for="guard_name">Guard</label>
-                                <input wire:model.live="guard_name" type="text" class="form-control" id="guard_name">
+                                <select wire:model.live="guard_name" class="form-control" id="guard_name">
+                                    @foreach ($guards as $guard)
+                                        <option value="{{ $guard }}">{{ $guard }}</option>
+                                    @endforeach
+                                </select>
                                 @error('guard_name') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
                         </div>
@@ -46,4 +49,3 @@
         </div>
     </div>
 </div>
-
