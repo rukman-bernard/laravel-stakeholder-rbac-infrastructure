@@ -143,6 +143,13 @@ https://github.com/scabarcas17/laravel-permissions-redis/issues/1
 The behaviour was acknowledged by the maintainer, and a fix for proper guard isolation is planned.
 
 ---
+## Related Internal Decision
+
+The evaluation also led to a refinement in this artefact’s RBAC design:
+
+- [ADR-008: Guard Validation for RBAC Entity Creation](../decisions/ADR-008-guard-validation-for-rbac-creation.md)
+
+---
 
 ## Key Takeaways
 
