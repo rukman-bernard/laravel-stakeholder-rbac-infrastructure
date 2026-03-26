@@ -6,10 +6,9 @@ use App\Constants\Permissions;
 use App\Traits\AuthorizesWithPermissions;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
-use Livewire\Attributes\Layout;
 
-// #[Layout('sysadmin.users')]
 class UserForm extends Component
 {
     use AuthorizesWithPermissions;
@@ -17,15 +16,14 @@ class UserForm extends Component
     public string $header_title = 'Permissions';
     public string $subtitle = '';
 
-
-    public $user = null; // Null if creating a new user
+    public $user = null;
     public $name;
     public $email;
     public $password;
     public $roles = [];
 
+    protected string $guard = 'web'; // 🔥 enforce guard
 
-    // You can pass an existing user from another component or route
     public function mount(User $user): void
     {
         if ($user->id) {
@@ -34,7 +32,13 @@ class UserForm extends Component
             $this->user = $user;
             $this->name = $user->name;
             $this->email = $user->email;
-            $this->roles = $user->roles()->pluck('name')->toArray(); // If using Spatie
+
+            // Only roles from web guard
+            $this->roles = $user->roles()
+                ->where('guard_name', $this->guard)
+                ->pluck('name')
+                ->toArray();
+
             $this->subtitle = 'Edit';
         } else {
             $this->authorizePermission(Permissions::CREATE_USERS, 'You do not have permission to create users.');
@@ -46,10 +50,27 @@ class UserForm extends Component
     {
         return [
             'name' => 'required|string|max:255',
-            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . ($this->user?->id ?? 'NULL')],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                'unique:users,email,' . ($this->user?->id ?? 'NULL')
+            ],
             'password' => $this->user ? 'nullable|min:6' : 'required|min:6',
-            'roles' => 'array'
+
+            // 🔥 validate roles belong to web guard
+            'roles' => [
+                'array',
+                Rule::in($this->availableRoleNames())
+            ]
         ];
+    }
+
+    public function availableRoleNames(): array
+    {
+        return \Spatie\Permission\Models\Role::where('guard_name', $this->guard)
+            ->pluck('name')
+            ->toArray();
     }
 
     public function save(): void
@@ -62,6 +83,7 @@ class UserForm extends Component
         $this->validate();
 
         $user = $this->user ?? new User();
+
         $user->name = $this->name;
         $user->email = $this->email;
 
@@ -71,21 +93,19 @@ class UserForm extends Component
 
         $user->save();
 
-        // Assign roles (if using Spatie)
+        // 🔥 safe assignment (web guard only)
         $user->syncRoles($this->roles);
 
         session()->flash('message', 'User saved successfully!');
 
-        // Optional: Redirect or emit event
-        $this->redirect(route('sysadmin.users')); // or $this->dispatch('user-saved');
+        $this->redirect(route('sysadmin.users'));
     }
 
     public function render()
     {
-        // Pass roles from DB (if using Spatie)
-        $allRoles = \Spatie\Permission\Models\Role::pluck('name', 'id');
+        $allRoles = \Spatie\Permission\Models\Role::where('guard_name', $this->guard)
+            ->pluck('name', 'id');
 
-        
         return view('livewire.sysadmin.spatie.user-form', [
             'allRoles' => $allRoles
         ]);
