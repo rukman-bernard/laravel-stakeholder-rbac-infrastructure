@@ -1,41 +1,57 @@
 # Theming Strategy
 
-This system supports **stakeholder-specific theming** (Student and Employer) while keeping the AdminLTE layout consistent, upgrade-friendly, and centrally managed. The strategy enables different visual appearances per stakeholder **without duplicating layouts or maintaining multiple AdminLTE variants**.
+This system supports **stakeholder-specific theming** while maintaining a single shared AdminLTE layout.
+
+The strategy enables different visual appearances per stakeholder **without duplicating layouts or maintaining multiple AdminLTE variants**.
+
+Authentication context and guard behaviour are defined in:
+
+→ [Authentication & Guards](./auth-and-guards.md)
+
+---
+
+## Overview
+
+The system applies theming based on the **resolved authentication context**.
+
+Visual customisation is achieved through:
+
+- a shared AdminLTE base theme  
+- optional stakeholder-specific skins  
+- runtime configuration via service layer  
+
+Theming is **configuration-driven and service-driven**, not layout-driven.
 
 ---
 
 ## Terminology
 
 - **Base theme (AdminLTE)**  
-  The default AdminLTE styling loaded via Vite and configured through `config/adminlte.php`.
+  Default AdminLTE styling loaded via Vite and configured through `config/adminlte.php`.
 
 - **Skin**  
-  A stakeholder-specific CSS or SCSS file that overrides selected visual styles **without altering layout structure**.
+  A stakeholder-specific CSS or SCSS file that overrides visual styles **without altering layout structure**.
 
 - **Theme switch class**  
-  A CSS class applied to the `<body>` element (e.g., `glassmorphism-theme`) that activates scoped SCSS overrides.
+  A CSS class applied to the `<body>` element (e.g., `glassmorphism-theme`) to activate scoped overrides.
 
-> In this document, **skin** refers strictly to a visual override layer applied on top of the AdminLTE base theme.
-
----
-
-## Goal
-
-- Provide different **skins per stakeholder** without duplicating layouts.
-- Keep AdminLTE upgrades safe and isolated.
-- Allow new skins to be introduced with minimal configuration changes.
-- Ensure deterministic behaviour through stylesheet ordering, allowing the AdminLTE base theme to remain effective when no stakeholder skin is applied.
+In this document, **skin** refers strictly to a visual override layer applied on top of the AdminLTE base theme.
 
 ---
 
 ## Architectural Approach
 
-1. **AdminLTE base styles load first** via Vite using `config/adminlte.php`.
-2. Stakeholder-specific configuration is applied at runtime via `AdminLTESettingsService`.
-3. Optional skin assets (CSS or SCSS) are loaded after the base theme.
-4. If no skin or theme switch class is configured, no visual overrides occur. The browser naturally applies the AdminLTE base styles through standard CSS cascade behaviour.
+1. AdminLTE base styles are loaded first via Vite  
+2. The active authentication context is resolved (see Authentication & Guards)  
+3. Runtime configuration is applied using a service layer  
+4. Optional skin assets are loaded after the base theme  
+5. If no skin is applied, AdminLTE base styles remain effective  
 
-Theming decisions are **service-driven**, not layout-driven.
+This ensures:
+
+- consistent layout across all stakeholders  
+- isolated visual customisation  
+- predictable CSS cascade behaviour  
 
 ---
 
@@ -43,18 +59,18 @@ Theming decisions are **service-driven**, not layout-driven.
 
 AdminLTE base styling is loaded first through Vite.
 
-Configuration:
+Configuration sources:
 
-- `config/adminlte.php`
-- `resources/css/app.css` (AdminLTE entry point)
+- `config/adminlte.php`  
+- `resources/css/app.css`  
 
-AdminLTE dark mode is controlled via configuration and may inject a `dark-mode` class into the `<body>` element.
-
-Example body output:
+AdminLTE may inject classes such as:
 
 ```html
 <body class="layout-top-nav sidebar-mini dark-mode">
 ```
+These classes control layout and default styling behaviour.
+
 ***
 
 ## Stakeholder Skin Configuration
@@ -64,42 +80,48 @@ Stakeholder skins are defined in:
 * `config/nka.php`
 
 Example:
+
 ```php
 'skins' => [
     'student'  => 'resources/scss/skins/student/student.scss',
     'employer' => 'resources/css/skins/employer.css',
 ],
 ```
-The skin entry is selected based on the **active authentication guard**.
+
+Skin selection is based on the **resolved authentication guard**.
 
 Guard resolution is performed centrally by:
 
-* `App\Services\Auth\GuardResolver`
+* `AppServicesAuthGuardResolver`
 
 ***
+
 ## Runtime Configuration (Service-Driven)
 
-Theming behaviour is applied at runtime by:
+Theming behaviour is applied at runtime using:
 
-* `App\Services\AdminLTE\AdminLTESettingsService`
+* `AppServicesAdminLTEAdminLTESettingsService`
 
 This service:
 
-* Resolves the active guard
+* resolves the active authentication context
+* applies guard-specific AdminLTE configuration
+* sets dashboard-related configuration
+* optionally injects theme switch classes
 
-* Applies dashboard routing configuration
+Example:
 
-* Applies guard-specific AdminLTE options
-
-* Optionally injects a theme switch class into `adminlte.classes_body`
-
-Example (student guard):
-```php
+```
 Config::set('adminlte.classes_body', 'glassmorphism-theme');
 ```
-The `glassmorphism-theme` class activates SCSS overrides scoped under that class.
 
-If no class is injected, no scoped overrides are activated. The AdminLTE base theme remains in effect without requiring additional fallback logic.
+This class activates scoped styling rules within skin files.
+
+If no class is applied:
+
+* no overrides are activated
+* AdminLTE base theme remains unchanged
+
 ***
 
 ## Skin Asset Files
@@ -107,67 +129,65 @@ If no class is injected, no scoped overrides are activated. The AdminLTE base th
 Current skin assets include:
 
 * `resources/scss/skins/student/student.scss`
-
 * `resources/css/skins/employer.css`
 
-Internal users authenticated under the `web` guard use the default AdminLTE theme unless explicitly overridden.
+Internal users (`web` guard) use the default AdminLTE theme unless explicitly overridden.
 
 ***
 
 ## Asset Bundling (Vite)
 
-All CSS and SCSS assets are served using **Vite**.
+All CSS and SCSS assets are served using Vite.
 
-* In development, Vite supports dynamic asset loading (HMR).
+* Development: supports dynamic loading (HMR)
+* Production: skin assets must be included in `vite.config.js`
 
-* In production, skin files must be included in `vite.config.js` under the `input` array to ensure compilation.
+This ensures:
 
-File:
-
-* `vite.config.js`
+* consistent asset compilation
+* predictable stylesheet loading
 
 ***
 
 ## Layout Consistency
 
-All stakeholders share a single AdminLTE layout:
+All stakeholders share a single layout structure:
 
 * `resources/views/components/layouts/adminlte-app.blade.php`
-
 * `resources/views/components/layouts/app.blade.php`
 
 No duplicate layouts exist per stakeholder.
 
-Visual differentiation is achieved purely through:
+Visual differences are applied through:
 
-* Runtime configuration
-
-* Skin assets
-
-* Optional body classes
+* runtime configuration
+* skin assets
+* optional body classes
 
 ***
 
 ## Benefits
 
 * **Upgrade-friendly AdminLTE integration**
-  AdminLTE is extended via configuration and service injection, not modified directly.
-
+  AdminLTE is extended through configuration rather than modification
 * **No layout duplication**
-  All stakeholders share the same structural layout.
-
+  All stakeholders share a single layout structure
 * **Deterministic behaviour**
-  Guard resolution and runtime configuration ensure predictable theming.
-
-* **Deterministic stylesheet layering**
-  AdminLTE base styles are always loaded first. Stakeholder skins are layered afterwards. If no skin is loaded, the base theme remains effective through normal CSS cascade resolution.
+  Guard resolution and runtime configuration ensure predictable theming
+* **Consistent stylesheet layering**
+  Base styles load first, skins apply only when configured
 
 ***
 
 ## Notes
 
-* Internal users (`web` guard) use the default AdminLTE theme.
+* Internal users (`web` guard) use the default AdminLTE theme
+* Student and employer portals may apply guard-specific skins
+* Theming affects visual appearance only; layout structure remains consistent
 
-* Student and employer portals may apply guard-specific skins.
+***
 
-* Theming customises visual appearance only; layout structure remains consistent across stakeholders.
+## Related Documents
+
+- [Authentication & Guards](./auth-and-guards.md)
+- [Stakeholders](./stakeholders.md)
