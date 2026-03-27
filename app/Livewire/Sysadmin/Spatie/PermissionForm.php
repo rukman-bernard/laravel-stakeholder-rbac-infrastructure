@@ -22,21 +22,28 @@ final class PermissionForm extends Component
         'permission:open' => 'open',
     ];
 
+    public function availableGuards(): array
+    {
+        return Guards::configured();
+    }
+
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('permissions', 'name')
+                    ->where(fn ($query) => $query->where('guard_name', $this->guard_name))
+                    ->ignore($this->permissionId),
+            ],
             'guard_name' => [
                 'required',
                 'string',
                 Rule::in($this->availableGuards()),
             ],
         ];
-    }
-
-    public function availableGuards(): array
-    {
-        return array_keys(config('auth.guards', []));
     }
 
     public function open(string $mode, ?int $id = null): void
@@ -87,7 +94,11 @@ final class PermissionForm extends Component
 
         $this->dispatch('modal:hide', modalId: 'permissionModal');
         $this->dispatch('permissions:refresh');
-        session()->flash('message', $this->permissionId ? 'Permission updated!' : 'Permission created!');
+
+        session()->flash(
+            'message',
+            $this->permissionId ? 'Permission updated!' : 'Permission created!'
+        );
     }
 
     public function render()
