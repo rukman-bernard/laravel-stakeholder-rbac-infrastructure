@@ -2,13 +2,13 @@
 
 namespace App\Livewire\Sysadmin\Spatie;
 
-use Livewire\Component;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
-use Illuminate\Validation\Rule;
 use App\Constants\Guards;
 use App\Constants\Permissions;
 use App\Traits\AuthorizesWithPermissions;
+use Illuminate\Validation\Rule;
+use Livewire\Component;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RoleForm extends Component
 {
@@ -29,22 +29,38 @@ class RoleForm extends Component
 
     public function availableGuards(): array
     {
-        return array_keys(config('auth.guards', []));
+        return Guards::configured();
+    }
+
+    public function availablePermissionNames(): array
+    {
+        return Permission::query()
+            ->where('guard_name', $this->guard_name)
+            ->pluck('name')
+            ->toArray();
     }
 
     public function rules(): array
     {
         return [
             'name' => [
-                'required', 'string', 'min:3',
-                Rule::unique('roles')->ignore($this->roleId),
+                'required',
+                'string',
+                'min:3',
+                Rule::unique('roles', 'name')
+                    ->where(fn ($query) => $query->where('guard_name', $this->guard_name))
+                    ->ignore($this->roleId),
             ],
             'guard_name' => [
                 'required',
                 'string',
                 Rule::in($this->availableGuards()),
             ],
-            'permissions' => 'array',
+            'permissions' => ['array'],
+            'permissions.*' => [
+                'string',
+                Rule::in($this->availablePermissionNames()),
+            ],
         ];
     }
 
@@ -55,22 +71,26 @@ class RoleForm extends Component
 
     public function updatedGuardName(): void
     {
-        $this->permissions = []; // reset selected permissions
+        $this->permissions = [];
         $this->loadPermissions();
     }
 
     private function loadPermissions(): void
     {
-        $this->allPermissions = Permission::where('guard_name', $this->guard_name)->get();
+        $this->allPermissions = Permission::query()
+            ->where('guard_name', $this->guard_name)
+            ->get();
     }
 
     public function create(): void
     {
-        $this->authorizePermission(Permissions::CREATE_ROLES, 'You do not have permission to create roles.');
+        $this->authorizePermission(
+            Permissions::CREATE_ROLES,
+            'You do not have permission to create roles.'
+        );
 
         $this->reset(['roleId', 'name', 'guard_name', 'permissions']);
         $this->guard_name = Guards::WEB;
-
         $this->loadPermissions();
 
         $this->mode = 'create';
@@ -79,9 +99,12 @@ class RoleForm extends Component
 
     public function edit(int $id): void
     {
-        $this->authorizePermission(Permissions::EDIT_ROLES, 'You do not have permission to edit roles.');
+        $this->authorizePermission(
+            Permissions::EDIT_ROLES,
+            'You do not have permission to edit roles.'
+        );
 
-        $role = Role::findOrFail($id);
+        $role = Role::query()->findOrFail($id);
 
         $this->roleId = $role->id;
         $this->name = $role->name;
@@ -110,7 +133,10 @@ class RoleForm extends Component
 
         $role = Role::updateOrCreate(
             ['id' => $this->roleId],
-            ['name' => $this->name, 'guard_name' => $this->guard_name]
+            [
+                'name' => $this->name,
+                'guard_name' => $this->guard_name,
+            ]
         );
 
         $role->syncPermissions($this->permissions);
