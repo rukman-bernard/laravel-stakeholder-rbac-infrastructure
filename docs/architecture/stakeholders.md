@@ -1,92 +1,115 @@
 # Stakeholders
 
-This document describes the system stakeholders, their authentication context, entry points, and associated UI configuration.
+This document defines the stakeholder domains supported by the system and the boundaries between them.
 
-Each stakeholder type is isolated through a dedicated authentication guard.  
-Authorisation (where applicable) is applied independently of authentication.
+Each stakeholder domain operates within a distinct authentication context.  
+Authentication behaviour is defined in:
 
----
+→ [Authentication & Guards](./auth-and-guards.md)
 
-## Student
+Authorisation behaviour is defined in:
 
-- Guard: `student`
-- Spatie Role: _Not applicable_
-- Login Route: `/student/login`
-- Logout Route: `/logout`
-- Registration Route: `/student/register`
-- Entry Route: `/student/dashboard`
-- Layout: `resources/views/components/layouts/app.blade.php`
-- CSS Skin: `resources/scss/skins/student/student.scss`
-
-Students authenticate under a dedicated guard and operate within an isolated portal context.  
-No role-based access control is currently applied within this guard.
+→ [Authorisation (RBAC)](./authorisation-rbac.md)
 
 ---
 
-## Employer
+## Overview
 
-- Guard: `employer`
-- Spatie Role: _Not applicable_
-- Login Route: `/employer/login`
-- Logout Route: `/logout`
-- Registration Route: `/employer/register`
-- Entry Route: `/employer/dashboard`
-- Layout: `resources/views/components/layouts/app.blade.php`
-- CSS Skin: `resources/css/skins/employer.css`
+The system currently supports three stakeholder domains:
 
-Employers authenticate under a dedicated guard separate from students and internal users.  
-No role-based access control is currently applied within this guard.
+- internal users
+- students
+- employers
 
----
+These domains are isolated through dedicated authentication guards and separate portal entry points.
 
-## Sysadmin
+This isolation ensures that:
 
-- Guard: `web`
-- Spatie Role: `sysadmin`
-- Login Route: `/login`
-- Logout Route: `/logout`
-- Registration Route: `/register`
-- Entry Route: `/sysadmin/dashboard`
-- Layout: `resources/views/components/layouts/app.blade.php`
-- CSS Skin: AdminLTE default (dark mode enabled)
-
-Sysadmin users perform system-level administration and security-sensitive operations.
+- authentication contexts remain separate
+- stakeholder-specific access boundaries are preserved
+- user experience can be tailored per portal without cross-domain ambiguity
 
 ---
 
-## Superadmin
+## Internal Users
 
-- Guard: `web`
-- Spatie Role: `superadmin`
-- Login Route: `/login`
-- Logout Route: `/logout`
-- Registration Route: `/register`
-- Entry Route: `/admin/dashboard`
-- Layout: `resources/views/components/layouts/app.blade.php`
-- CSS Skin: AdminLTE default (dark mode enabled)
+Internal users authenticate under the `web` guard.
 
-Superadmin users have full administrative capabilities within the application domain, excluding sysadmin-only functions.
+This domain includes the following RBAC roles:
 
----
+- `sysadmin`
+- `superadmin`
+- `admin`
 
-## Admin
+These users share the same authentication context and are differentiated through Spatie roles and permissions rather than separate guards.
 
-- Guard: `web`
-- Spatie Role: `admin`
-- Login Route: `/login`
-- Logout Route: `/logout`
-- Registration Route: `/register`
-- Entry Route: `/admin/dashboard`
-- Layout: `resources/views/components/layouts/app.blade.php`
-- CSS Skin: AdminLTE default (dark mode enabled)
+Internal users are responsible for:
 
-Admin users perform standard administrative functions within the application.
+- system administration
+- application administration
+- operational management of protected functionality
+
+Dashboard routing for internal users is role-aware.
+
+See:
+
+- [Authentication & Guards](./auth-and-guards.md)
+- [Authorisation (RBAC)](./authorisation-rbac.md)
 
 ---
 
-> **Note:** Sysadmin, Superadmin, and Admin users share the same authentication guard (`web`).  
-> They are differentiated strictly through Spatie roles and permissions.  
-> No additional logical grouping or implicit role abstraction is used within the system.
+## Students
+
+Students authenticate under the `student` guard.
+
+This domain is isolated from internal users and employers and uses its own authentication context.
+
+At the current stage of the system:
+
+- role-based access control is not applied within the student portal
+- separation is achieved through guard isolation and portal-specific routing
+
+Students access only student-specific features and workflows.
+
+---
+
+## Employers
+
+Employers authenticate under the `employer` guard.
+
+This domain is isolated from internal users and students and operates within its own portal context.
+
+At the current stage of the system:
+
+- role-based access control is not applied within the employer portal
+- access separation is enforced through guard isolation and employer-specific routing
+
+Employers access only employer-specific features and workflows.
+
+---
+
+## Isolation Model
+
+Each stakeholder domain is treated as a separate security and interaction boundary.
+
+This means:
+
+- a stakeholder account belongs to one authentication context only
+- credentials and session state remain isolated by guard
+- portal-specific UI behaviour can be resolved after authentication
+- cross-domain privilege leakage is structurally reduced
+
+Where a single person requires access to multiple domains, this is handled through separate accounts and separate authentication contexts.
+
+---
+
+## UI and Portal Behaviour
+
+Stakeholder-specific layout and theming behaviour are resolved after authentication based on the active guard and, where applicable, the resolved internal role.
+
+Details of UI resolution and theming are documented in:
+
+- [Theming Strategy](./theming-strategy.md)
 
 ---
 
@@ -107,7 +130,12 @@ flowchart TB
     R -->|sysadmin| SYD[/sysadmin/dashboard/]
     R -->|superadmin| AD[/admin/dashboard/]
     R -->|admin| AD[/admin/dashboard/]
+```
 
-    S --> SL[app.blade.php + student skin]
-    E --> EL[app.blade.php + employer skin]
-    W --> WL[app.blade.php + AdminLTE default]
+---
+
+## Related Documents
+
+- [Authentication & Guards](./auth-and-guards.md)
+- [Authorisation (RBAC)](./authorisation-rbac.md)
+- [Theming Strategy](./theming-strategy.md)
