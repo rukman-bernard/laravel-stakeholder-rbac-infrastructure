@@ -6,77 +6,91 @@ namespace App\Constants;
  * Guards
  * ======
  *
- * Centralised definition and classification of authentication guard names
- * used by the application.
+ * Centralised application guard registry and helper methods for authentication
+ * guard names used by the infrastructure.
  *
- * Purpose
- * -------
- * - Provide a single source of truth for all guard identifiers
- * - Prevent string duplication across routes, middleware, and services
- * - Support deterministic multi-guard resolution (single active session)
- * - Offer guard categorisation helpers for portal and API flows
+ * Architectural Intent
+ * --------------------
+ * This class is intentionally not a thin alias around config('auth.guards').
+ *
+ * A guard becomes fully usable within the infrastructure only when it is:
+ *
+ * 1. configured in Laravel authentication configuration (`config/auth.php`)
+ * 2. recognised by this application guard registry
+ *
+ * This two-step model is deliberate.
+ *
+ * Why explicit registration exists
+ * --------------------------------
+ * In this infrastructure, guards influence more than authentication. They also
+ * affect:
+ *
+ * - validation and UI selection
+ * - human-readable labels
+ * - portal classification
+ * - deterministic multi-guard resolution policy
+ * - broader application semantics
+ *
+ * For that reason, adding a new guard is treated as an application-level
+ * architectural change, not just a framework configuration change.
  *
  * Design Notes
  * ------------
- * - Guards represent authentication context only (session or token)
- * - User providers, password brokers, roles, and permissions are configured elsewhere
- * - This class must not reference models, roles, or application logic
+ * - `all()` defines the application's known guard vocabulary
+ * - `configured()` returns known guards currently enabled in `config/auth.php`
+ * - runtime guard classification (session vs non-session) is derived from config
+ * - `resolutionOrder()` expresses application policy, filtered by configured
+ *   session guards at runtime
+ * - this class must not reference models, roles, or broader application logic
  *
  * Typical Usage
  * -------------
- * - Routes:
- *     auth: implode(',', Guards::session())
+ * - Validation:
+ *     Guards::configured()
+ *     Guards::isConfigured($guard)
  *
- * - Middleware:
- *     Guards::resolutionOrder()  // deterministic guard resolution
- *     Guards::isPortal($g)    // portal-specific behaviour
+ * - Classification:
+ *     Guards::session()
+ *     Guards::nonSession()
+ *     Guards::portal()
  *
- * - UI / Logs:
+ * - Middleware / auth resolution:
+ *     Guards::resolutionOrder()
+ *
+ * - UI / logs:
  *     Guards::label($guard)
  *
- * - Validation:
- *     Guards::normalize($input)
+ * - Hard rules:
+ *     Guards::WEB
  */
-
 final class Guards
 {
-    
-/**
- * Guard names for session-based authentication.
- * These represent interactive user portals.
- */
+    /**
+     * Canonical application guard identifiers.
+     *
+     * These constants represent guards intentionally supported by the
+     * infrastructure. Adding a new guard should be reflected here explicitly.
+     */
     public const WEB      = 'web';
     public const STUDENT  = 'student';
     public const EMPLOYER = 'employer';
-
-    /**
-     * Non-session authentication guard (e.g. API tokens / Sanctum).
-     * Only include if configured in config/auth.php.
-     */
     public const API      = 'api';
 
     /**
-     * Single source of truth for guard groupings.
-     * Keep these lists in sync with config/auth.php.
+     * Preferred deterministic resolution order for session-based guards.
+     *
+     * This expresses application policy rather than raw framework
+     * configuration. The final runtime order is filtered through configured
+     * session guards.
      */
-    private const SESSION_GUARDS = [
+    private const RESOLUTION_ORDER = [
         self::WEB,
         self::STUDENT,
         self::EMPLOYER,
     ];
 
-    private const NON_SESSION_GUARDS = [
-        self::API,
-    ];
-
     /**
-     * Preferred resolution order for multi-guard auth:
-     * "first authenticated guard wins".
-     */
-    private const RESOLUTION_ORDER = self::SESSION_GUARDS;
-
-    /**
-     * Human-readable labels for each guard.
+     * Human-readable labels for known guards.
      */
     private const LABELS = [
         self::WEB      => 'Web',
@@ -86,67 +100,110 @@ final class Guards
     ];
 
     /**
-     * Return all configured guard names (session + non-session).
+     * Return all guards explicitly recognised by the application.
      *
-     * Use when validating guard input or iterating all known guards.
+     * This is the infrastructure's application-level guard vocabulary.
+     * A guard configured in Laravel but absent here is not treated as usable
+     * by the application abstraction until it is explicitly registered.
      */
     public static function all(): array
     {
-        // array_values to guarantee numeric indexes
-        return array_values(array_merge(self::SESSION_GUARDS, self::NON_SESSION_GUARDS));
+        return [
+            self::WEB,
+            self::STUDENT,
+            self::EMPLOYER,
+            self::API,
+        ];
     }
 
     /**
-     * Return guards intended for session-based authentication.
+     * Return all configured guards recognised by the application.
      *
-     * Used by route middleware and multi-guard authentication logic.
+     * This method intersects framework configuration with the application's
+     * supported guard vocabulary.
+     */
+    public static function configured(): array
+    {
+        $configured = array_keys(config('auth.guards', []));
+
+        return array_values(array_intersect(self::all(), $configured));
+    }
+
+    /**
+     * Return configured session-based guards.
+     *
+     * Session classification is derived from auth configuration rather than
+     * hardcoded separately in this class.
      */
     public static function session(): array
     {
-        return self::SESSION_GUARDS;
+        return array_values(array_filter(
+            self::configured(),
+            static fn (string $guard): bool => self::driver($guard) === 'session'
+        ));
     }
 
     /**
-     * Return guards that do not use sessions (e.g. API).
+     * Return configured non-session guards.
      */
     public static function nonSession(): array
     {
-        return self::NON_SESSION_GUARDS;
+        return array_values(array_filter(
+            self::configured(),
+            static fn (string $guard): bool => self::driver($guard) !== 'session'
+        ));
     }
 
     /**
-     * Return portal guards (session-based, excluding the web guard).
+     * Return configured portal guards.
      *
-     * Useful for portal-specific routing and UI logic.
+     * Portal guards are session-based guards excluding the internal `web` guard.
      */
     public static function portal(): array
     {
-        return array_values(array_diff(self::SESSION_GUARDS, [self::WEB]));
+        return array_values(array_diff(self::session(), [self::WEB]));
+    }
+
+    /**
+     * Return the configured driver for a guard, or null if unavailable.
+     */
+    public static function driver(string $guard): ?string
+    {
+        return config("auth.guards.{$guard}.driver");
     }
 
     /**
      * Return guard resolution order for deterministic multi-guard authentication.
      *
-     * Guards are evaluated in this order.
-     * The first authenticated guard is treated as the active context.
+     * The preferred application policy order is filtered to configured
+     * session guards so that only runtime-available session guards participate
+     * in resolution.
      */
     public static function resolutionOrder(): array
     {
-        return self::RESOLUTION_ORDER;
+        return array_values(array_intersect(
+            self::RESOLUTION_ORDER,
+            self::session()
+        ));
     }
 
     /**
-     * Return the default session guard for the application.
+     * Return the default guard for the application.
      *
-     * Must remain consistent with config/auth.php defaults.guard.
+     * Falls back to WEB if config is missing or resolves to a guard not
+     * recognised by the application registry.
      */
     public static function default(): string
     {
-        return self::WEB;
+        $default = config('auth.defaults.guard', self::WEB);
+
+        return self::isConfigured($default) ? $default : self::WEB;
     }
 
     /**
-     * Determine whether a guard name is valid and configured.
+     * Determine whether a guard name is recognised by the application.
+     *
+     * This checks membership in the application registry only.
      */
     public static function isValid(?string $guard): bool
     {
@@ -158,15 +215,36 @@ final class Guards
     }
 
     /**
-     * Determine whether a guard uses session-based authentication.
+     * Determine whether a guard is both recognised by the application and
+     * configured in Laravel authentication configuration.
      */
-    public static function isSession(string $guard): bool
+    public static function isConfigured(?string $guard): bool
     {
-        return in_array($guard, self::SESSION_GUARDS, true);
+        if ($guard === null || $guard === '') {
+            return false;
+        }
+
+        return in_array($guard, self::configured(), true);
     }
 
     /**
-     * Determine whether a guard represents a portal user.
+     * Determine whether a configured guard uses session-based authentication.
+     */
+    public static function isSession(string $guard): bool
+    {
+        return self::isConfigured($guard) && self::driver($guard) === 'session';
+    }
+
+    /**
+     * Determine whether a configured guard uses non-session authentication.
+     */
+    public static function isNonSession(string $guard): bool
+    {
+        return self::isConfigured($guard) && self::driver($guard) !== 'session';
+    }
+
+    /**
+     * Determine whether a configured guard represents a portal user.
      */
     public static function isPortal(string $guard): bool
     {
@@ -175,8 +253,6 @@ final class Guards
 
     /**
      * Return all human-readable guard labels.
-     *
-     * Intended for UI display, logs, and reports.
      */
     public static function labels(): array
     {
@@ -194,7 +270,7 @@ final class Guards
     /**
      * Normalize a guard value from user input or route parameters.
      *
-     * Returns null if the guard is not recognised.
+     * Returns null if the guard is not recognised by the application registry.
      */
     public static function normalize(?string $guard): ?string
     {
@@ -205,5 +281,18 @@ final class Guards
         $guard = strtolower(trim($guard));
 
         return self::isValid($guard) ? $guard : null;
+    }
+
+    /**
+     * Normalize a guard value and ensure it is configured.
+     *
+     * Returns null if the guard is not configured in auth.php or not recognised
+     * by the application registry.
+     */
+    public static function normalizeConfigured(?string $guard): ?string
+    {
+        $guard = self::normalize($guard);
+
+        return self::isConfigured($guard) ? $guard : null;
     }
 }
