@@ -4,42 +4,44 @@
 
 This repository provides a **reusable multi-guard authentication and role-based access control (RBAC) infrastructure** built on Laravel.
 
-Its primary objective is to establish a deterministic and extensible foundation that:
+It establishes a deterministic and extensible foundation that:
 
-- Isolates authentication contexts using Laravel guards
-- Differentiates internal users using role-based access control
-- Enforces a single active authentication context per session
-- Supports multiple stakeholder domains without layout duplication
-- Applies runtime UI configuration in a centralised, upgrade-safe manner
+- isolates authentication contexts using Laravel guards  
+- differentiates internal users using role-based access control  
+- enforces a single active authentication context per session  
+- supports multiple stakeholder domains without layout duplication  
+- applies runtime UI configuration in a centralised, upgrade-safe manner  
 
-This repository represents the **infrastructure layer**, designed to be adapted to various institutional or organisational contexts without altering its core architectural principles.
+This repository represents the **infrastructure layer**, designed to be adapted to different domains without modifying its core architectural principles.
+
+---
+
+## Core Concepts
+
+The system is built around the following core concepts:
+
+- **Authentication (Guards)** → defines who is authenticated  
+- **Authorisation (RBAC)** → defines what a user can access  
+- **Stakeholder Domains** → define system boundaries  
+- **Service-Driven Infrastructure** → centralises runtime behaviour  
+- **Theming Strategy** → applies visual differentiation without layout duplication  
+
+See:
+
+- [Authentication & Guards](./auth-and-guards.md)  
+- [Authorisation (RBAC)](./authorisation-rbac.md)  
+- [Stakeholders](./stakeholders.md)  
+- [Theming Strategy](./theming-strategy.md)  
 
 ---
 
 ## Stakeholder Domains
 
-The system defines three primary authentication domains:
+The system supports multiple stakeholder domains, each operating within an isolated authentication context.
 
-### Students
-Students authenticate using the `student` guard.  
-This guard operates independently from other domains and provides isolated access to the student portal.
+Stakeholder definitions and responsibilities are described in:
 
-### Employers
-Employers authenticate using the `employer` guard.  
-This guard is isolated from both students and internal users.
-
-### Internal Users
-Internal users authenticate using the `web` guard.
-
-Within this guard, users are differentiated using Spatie roles:
-
-- `sysadmin`
-- `superadmin`
-- `admin`
-
-Role-based access control determines feature access, dashboard routing, and UI visibility within this authentication domain.
-
-Each stakeholder domain represents a distinct authentication context with its own provider and session boundary.
+→ [Stakeholders](./stakeholders.md)
 
 ---
 
@@ -47,27 +49,25 @@ Each stakeholder domain represents a distinct authentication context with its ow
 
 ### Laravel Backend
 
-The system is built on Laravel, which provides:
+Laravel provides the core execution environment, including:
 
-- Multi-guard authentication
-- Middleware-driven request handling
-- Service container and dependency injection
-- Secure password hashing and session management
-- Structured configuration management
-
-Laravel forms the core execution environment for authentication, authorisation, routing, and runtime configuration.
+- multi-guard authentication  
+- middleware-driven request handling  
+- service container and dependency injection  
+- secure session and password management  
+- structured configuration system  
 
 ---
 
 ### Livewire UI Layer
 
-Livewire is used to build interactive, server-driven UI components.
+Livewire is used to build server-driven UI components.
 
 This enables:
 
-- Centralised permission enforcement
-- Consistent integration with Laravel’s authorisation system
-- Reduced frontend complexity while preserving SPA-like behaviour
+- centralised permission enforcement  
+- seamless integration with Laravel authorisation  
+- SPA-like interactivity without client-side complexity  
 
 ---
 
@@ -75,33 +75,34 @@ This enables:
 
 AdminLTE 3 provides the base layout framework.
 
-Architectural characteristics:
+Key characteristics:
 
-- AdminLTE is extended, not modified
-- Layout behaviour is configured at runtime
-- All stakeholders share a single structural layout
-- Visual differentiation is achieved through layered skins
+- layout structure is shared across all stakeholders  
+- AdminLTE is extended through configuration, not modified  
+- visual differentiation is applied through theming layers  
 
-Layout structure remains invariant across stakeholders.
+See:
+
+→ [Theming Strategy](./theming-strategy.md)
 
 ---
 
 ### Service-Driven Infrastructure
 
-Core infrastructure behaviour is centralised within dedicated service classes, including:
+Core behaviour is centralised within service classes, including:
 
-- GuardResolver
-- DashboardResolver
-- PasswordBrokerResolver
-- GuardLogoutService
-- AdminLTESettingsService
+- GuardResolver  
+- DashboardResolver  
+- PasswordBrokerResolver  
+- GuardLogoutService  
+- AdminLTESettingsService  
 
-This service-driven approach:
+This approach:
 
-- Prevents configuration drift
-- Avoids guard logic duplication
-- Enforces deterministic request handling
-- Improves maintainability and testability
+- prevents configuration drift  
+- eliminates guard logic duplication  
+- enforces deterministic behaviour  
+- improves maintainability and testability  
 
 ---
 
@@ -111,12 +112,9 @@ Vite is used for asset bundling and stylesheet management.
 
 It ensures:
 
-- Deterministic stylesheet ordering
-- Efficient production builds
-- Controlled layering of CSS and SCSS skins
-
-AdminLTE base styles load first.  
-Optional stakeholder skins are layered afterward through normal CSS cascade behaviour.
+- deterministic stylesheet ordering  
+- efficient production builds  
+- controlled layering of base styles and stakeholder skins  
 
 ---
 
@@ -125,19 +123,26 @@ Optional stakeholder skins are layered afterward through normal CSS cascade beha
 ```text
 User
   ↓
-Authentication Guard (GuardResolver)
+Authentication Context (GuardResolver)
   ↓
 Route Group (per guard)
   ↓
 Livewire Component
   ↓
-Role / Permission Enforcement (if web guard)
+Authorisation (RBAC where applicable)
   ↓
-AdminLTESettingsService (runtime configuration)
+Runtime Configuration (AdminLTESettingsService)
   ↓
 Layout Rendering (AdminLTE base)
   ↓
 Optional Stakeholder Skin (CSS cascade)
 ```
+
+
+## Related Documents
+- [Authentication & Guards](./auth-and-guards.md)
+- [Authorisation (RBAC)](./authorisation-rbac.md)
+-  [Stakeholders](./stakeholders.md)
+- [Theming Strategy](./theming-strategy.md)
 
 ```
