@@ -23,3 +23,8 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+
+# Ignore files ending with _bck anywhere in the project
+*_bck*
+*_bck*/
