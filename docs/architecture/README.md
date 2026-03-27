@@ -1,120 +1,129 @@
 # Architecture Documentation
 
-This section presents the architectural design of the Laravel Stakeholder RBAC Infrastructure Artefact.
+This section describes the architectural design of the Laravel Stakeholder RBAC Infrastructure Artefact.
 
-It explains how the system is structured, how responsibilities are separated, and how major technical concerns interact within the Laravel infrastructure. While the focus remains on design intent and architectural rationale, the documentation references the concrete services that enforce these behaviours.
+It provides a structured view of how the system is organised, how responsibilities are separated, and how core technical concerns interact within the Laravel environment.
+
+Each document in this section focuses on a specific architectural concern.  
+Detailed behaviour is defined within those documents and referenced here.
 
 ---
 
 ## Scope
 
-**Architecture documentation covers:**
+The architecture documentation covers:
 
-- Multi-guard authentication architecture (Laravel session guards)
-- Role-based authorisation using Spatie RBAC
-- Deterministic guard resolution and dashboard routing
-- AdminLTE runtime configuration and theming strategy
-- Single-session enforcement model
-- Infrastructure boundaries and deployment separation
+- multi-guard authentication model  
+- role-based authorisation (RBAC)  
+- deterministic authentication context resolution  
+- stakeholder domain isolation  
+- runtime UI configuration and theming  
+- infrastructure service layer design  
 
-**This section answers questions such as:**
+This section answers questions such as:
 
-- How are internal users and portal stakeholders isolated?
-- How does authentication differ from authorisation at runtime?
-- How are dashboards resolved deterministically?
-- How is UI presentation handled without duplicating layouts?
-- How does the infrastructure prevent cross-portal privilege leakage?
-- How do these architectural choices support long-term maintainability and extensibility?
+- How are authentication contexts isolated?
+- How does authentication differ from authorisation?
+- How is a single active authentication context enforced?
+- How are dashboards and UI behaviour resolved?
+- How does the system avoid layout duplication?
+- How does the architecture support extensibility?
 
 ---
 
 ## Architectural Principles
 
-The system architecture is guided by the following principles:
-
 ### Separation of Concerns
-Authentication, authorisation, and presentation are explicitly decoupled:
 
-- Authentication context is resolved via `GuardResolver`
-- Dashboard routing is handled by `DashboardResolver`
-- Login redirection is managed by `GuardRedirectService`
-- Logout enforcement is centralised in `GuardLogoutService`
-- Password broker mapping is handled by `PasswordBrokerResolver`
-- Runtime UI configuration is applied via `AdminLTESettingsService`
+Authentication, authorisation, and presentation are explicitly decoupled.
 
-No layer directly couples authentication logic with RBAC or presentation logic.
+Core responsibilities are handled by dedicated services:
+
+- authentication context → `GuardResolver`  
+- dashboard routing → `DashboardResolver`  
+- login redirection → `GuardRedirectService`  
+- logout enforcement → `GuardLogoutService`  
+- password broker mapping → `PasswordBrokerResolver`  
+- runtime UI configuration → `AdminLTESettingsService`  
+
+Each concern operates independently, avoiding cross-layer coupling.
 
 ---
 
 ### Deterministic Behaviour
 
-Guard resolution and routing behave predictably across sessions:
+Authentication context resolution is deterministic.
 
-- Session guards are resolved deterministically via `GuardResolver`, with priority applied only in defensive edge cases.
-- Dashboard routes are mapped using `config/nka.php`
-- Guest-route protection is enforced by `RedirectLoggedInToDashboard`
-- Redirect recovery is handled through the `auth.reset` route
+- Guards are resolved using a predefined resolution order  
+- Only configured session guards participate in resolution  
+- A single authentication context is active per session  
 
-This ensures that only one authentication context is active per browser session.
+Routing and UI configuration are derived from this resolved context.
 
 ---
 
 ### Upgrade Safety
 
-Third-party frameworks (e.g., AdminLTE) are extended rather than modified:
+Third-party frameworks (e.g., AdminLTE) are extended rather than modified.
 
-- AdminLTE configuration is applied at runtime using `AdminLTESettingsService`
-- No vendor files are edited
-- Layout behaviour is controlled through configuration and service injection
+- configuration is applied at runtime  
+- vendor files are not edited  
+- layout behaviour is controlled through services  
 
-This preserves framework upgrade compatibility.
+This preserves compatibility with framework updates.
 
 ---
 
 ### Extensibility
 
-The architecture supports the addition of new portal guards without structural refactoring:
+The architecture supports the introduction of new stakeholder domains without structural refactoring.
 
-- Guard labels and priority are defined centrally (`App\Constants\Guards`)
-- Dashboard routing is defined in `config/nka.php`
-- Portal-specific UI overrides are isolated in `AdminLTESettingsService`
-- Password broker mapping is configurable per guard
+- guards are defined and validated through `App\Constants\Guards`  
+- routing is configured via `config/nka.php`  
+- UI behaviour is resolved dynamically  
+- RBAC remains guard-scoped and extensible  
 
-New guards can be introduced without modifying core authentication flow.
+New domains can be introduced by configuration and integration, not redesign.
 
 ---
 
 ## Prototype Naming Legacy
 
-Some configuration namespaces and identifiers in the reference implementation
-use the prefix `nka` (for example `config/nka.php`).
+Some configuration namespaces use the prefix `nka` (e.g., `config/nka.php`).
 
-This prefix originates from the prototype system used during the research
-phase of this infrastructure. It is retained in the reference implementation
-to preserve compatibility with the original evaluation environment.
+This originates from the prototype system used during the research phase and is retained for compatibility.
 
-The prefix does not represent a functional dependency on any specific
-institution or domain. Systems adopting this infrastructure may freely rename
-the configuration namespace if desired.
+It does not represent a dependency on a specific institution.  
+Adopting systems may rename this namespace if required.
 
 ---
 
-## Documents in This Section
+## Architecture Documents
+
+The architecture is divided into focused documents:
+
+- [System Overview](./overview.md)  
+  High-level system structure and component relationships  
 
 - [Authentication & Guards](./auth-and-guards.md)  
-  Describes the multi-guard authentication model, deterministic guard resolution (`GuardResolver`), dashboard mapping (`DashboardResolver`), and single-session enforcement.
+  Guard model, classification, and deterministic resolution  
 
 - [Authorisation (RBAC)](./authorisation-rbac.md)  
-  Explains how roles and permissions (Spatie) are enforced within an authenticated guard context.
+  Role and permission model and enforcement  
+
+- [Stakeholders](./stakeholders.md)  
+  Stakeholder domains and isolation boundaries  
 
 - [Theming Strategy](./theming-strategy.md)  
-  Describes how runtime UI configuration is applied via `AdminLTESettingsService`, including guard-aware layout and body class overrides (e.g., `glassmorphism-theme`).
+  Runtime UI configuration and visual differentiation  
 
 ---
 
 ## Summary
 
-- The architecture defines clear security and identity boundaries between internal users (`web` guard) and portal stakeholders (`student`, `employer`).
-- Authentication context resolution, dashboard routing, and UI configuration are deterministic and centrally managed.
-- Authorisation is layered on top of authentication and remains guard-scoped.
-- The infrastructure is modular, upgrade-safe, and designed for long-term evolution without compromising authentication isolation or presentation integrity.
+- Authentication contexts are isolated using Laravel guards  
+- Authorisation is layered on top of authentication using RBAC  
+- Stakeholder domains are separated structurally and behaviourally  
+- Runtime behaviour is driven by centralised service classes  
+- UI presentation is consistent and configurable without layout duplication  
+- The system is designed for maintainability, extensibility, and upgrade safety  
