@@ -63,7 +63,7 @@ final class GuardResolver
 
         return collect($guards)
             ->filter(fn ($g) => is_string($g))
-            ->map(fn ($g) => Guards::normalize($g))
+            ->map(fn ($g) => Guards::normalizeConfigured($g))
             ->filter()
             ->unique()
             ->values()
@@ -77,16 +77,8 @@ final class GuardResolver
      */
     public function configuredSessionGuardsInResolutionOrder(): array
     {
-        $configuredSession = collect(config('auth.guards', []))
-            ->filter(fn ($g) => ($g['driver'] ?? null) === 'session')
-            ->keys()
-            ->values()
-            ->all();
+        $base = Guards::session();
 
-        // Only allow session guards known by your system AND configured in auth.php
-        $base = array_values(array_intersect(Guards::session(), $configuredSession));
-
-        // Resolution order from Guards (single source of truth)
         $ordered = array_values(array_intersect(Guards::resolutionOrder(), $base));
         $remaining = array_values(array_diff($base, $ordered));
 

@@ -19,7 +19,7 @@ final class PasswordBrokerResolver
      */
     public function broker(string $guard): string
     {
-        $guard = Guards::normalize($guard) ?? Guards::default();
+        $guard = Guards::normalizeConfigured($guard) ?? Guards::default();
 
         $map = config('nka.auth.password_brokers', []);
         $defaultBroker = $this->defaultBroker();
