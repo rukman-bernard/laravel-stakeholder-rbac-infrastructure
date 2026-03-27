@@ -15,6 +15,10 @@ The objective of this evaluation was to assess:
 
 This evaluation was conducted independently in a controlled local environment.
 
+Guard behaviour, classification, and resolution in this system are defined in:
+
+→ [Authentication & Guards](../architecture/auth-and-guards.md)
+
 ---
 
 ## Environment Setup
@@ -25,9 +29,9 @@ The package was tested using a lightweight containerised setup:
 - Docker (PHP-FPM, Nginx, Redis)  
 - SQLite (for simplified testing)  
 - Predis (Redis client)  
-- laravel-permissions-redis (v1.1.1)
+- laravel-permissions-redis (v1.1.1)  
 
-Date of evaluation: **25 March 2026**
+**Date of evaluation:** 25 March 2026  
 
 The package was installed and configured according to its documentation, including cache warming.
 
@@ -54,7 +58,7 @@ $role->permissions()->sync([$permission->id]);
 $user->assignRole('editor'); // web
 ```
 
----
+***
 
 ## Observations
 
@@ -72,7 +76,7 @@ $user->hasRole('editor', 'api'); // true
 
 Despite only assigning roles and permissions under the `web` guard, checks against the `api` guard also returned `true`.
 
----
+***
 
 ## Analysis
 
@@ -82,12 +86,12 @@ As a result, guard boundaries are not strictly enforced when identical names exi
 
 This behaviour may lead to unintended authorization outcomes in systems where:
 
-- multiple guards are used (e.g., `web`, `student`, `employer`, `api`)
-- permission and role names overlap across contexts
+* multiple guards are used (e.g., `web`, `student`, `employer`, `api`)
+* permission and role names overlap across contexts
 
 This is particularly relevant in multi-stakeholder systems where strict separation between authentication contexts is required.
 
----
+***
 
 ## Validation
 
@@ -95,83 +99,86 @@ Redis cache inspection confirmed that roles and permissions were being stored an
 
 Example Redis keys:
 
-- `auth:user:{userId}:roles`
-- `auth:user:{userId}:permissions`
-- `auth:role:{roleId}:permissions`
-- `auth:role:{roleId}:users`
+* `auth:user:{userId}:roles`
+* `auth:user:{userId}:permissions`
+* `auth:role:{roleId}:permissions`
+* `auth:role:{roleId}:users`
 
 This suggests that the issue is not related to caching, but to how authorization resolution is performed.
 
----
+***
 
 ## Impact
 
 In multi-guard environments, this behaviour can:
 
-- weaken logical separation between authentication contexts
-- introduce ambiguity in authorization checks
-- lead to incorrect access decisions when identifiers overlap
+* weaken logical separation between authentication contexts
+* introduce ambiguity in authorization checks
+* lead to incorrect access decisions when identifiers overlap
 
 For systems designed around stakeholder-specific guards, this represents an important architectural consideration.
 
----
+***
 
 ## Reflection
 
 This evaluation highlighted the importance of strict guard boundary enforcement in RBAC systems.
 
-While analysing this behaviour, I identified a similar gap in my own RBAC infrastructure, where guard names could be assigned without validation against Laravel’s configured authentication guards.
+While analysing this behaviour, I identified a similar gap in my own RBAC infrastructure.
 
-As a result, I improved my own system by:
+To align RBAC behaviour with the system’s guard model, I introduced the following improvements:
 
-- restricting guard assignment to configured guards (`config('auth.guards')`)
-- enforcing guard validation at input level
-- aligning authorization behaviour more closely with Laravel’s guard model
+* restricting guard assignment to configured application guards (`Guards::configured()`)
+* enforcing guard validation at input level
+* aligning authorization behaviour with the application guard abstraction
 
----
+These changes ensure that only guards explicitly recognised by the system are accepted within RBAC workflows.
+
+***
 
 ## Contribution
 
 The findings were shared with the package author via:
 
-- a LinkedIn discussion
-- a GitHub issue with reproducible test steps
+* a LinkedIn discussion
+* a GitHub issue with reproducible test steps
 
-GitHub issue (reproduction and discussion):  
-https://github.com/scabarcas17/laravel-permissions-redis/issues/1
+**GitHub issue (reproduction and discussion):**
+<https://github.com/scabarcas17/laravel-permissions-redis/issues/1>
 
 The behaviour was acknowledged by the maintainer, and a fix for proper guard isolation is planned.
 
----
+***
+
 ## Related Internal Decision
 
-The evaluation also led to a refinement in this artefact’s RBAC design:
+This evaluation directly influenced an architectural refinement in this artefact:
 
-- [ADR-008: Guard Validation for RBAC Entity Creation](../decisions/ADR-008-guard-validation-for-rbac-creation.md)
+* [ADR-008: Guard Validation for RBAC Entity Creation](../decisions/ADR-008-guard-validation-for-rbac-creation.md)
 
----
+***
 
 ## Key Takeaways
 
-- Redis-backed authorization can significantly improve performance
-- Guard handling is a critical aspect of RBAC design
-- Name-based resolution alone is insufficient in multi-guard systems
-- Edge-case testing is essential for validating system correctness
-- Evaluating third-party packages can uncover improvements in internal system design
+* Redis-backed authorization can significantly improve performance
+* Guard handling is a critical aspect of RBAC design
+* Name-based resolution alone is insufficient in multi-guard systems
+* Edge-case testing is essential for validating system correctness
+* Evaluating third-party packages can uncover improvements in internal system design
 
----
+***
 
 ## Note
 
 This case study is based on an independent evaluation of the open-source package:
 
-**laravel-permissions-redis** by Sebastian Cabarcas  
-Version tested: **v1.1.1**  
-Date of evaluation: **25 March 2026**
+**laravel-permissions-redis** by Sebastian Cabarcas
+**Version tested:** v1.1.1
+**Date of evaluation:** 25 March 2026
 
-https://packagist.org/packages/scabarcas/laravel-permissions-redis  
+<https://packagist.org/packages/scabarcas/laravel-permissions-redis>
 
-Source repository:  
-https://github.com/scabarcas17/laravel-permissions-redis  
+**Source repository:**
+<https://github.com/scabarcas17/laravel-permissions-redis>
 
 All testing was conducted locally and is intended to support architectural understanding.

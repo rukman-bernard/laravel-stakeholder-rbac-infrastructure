@@ -40,7 +40,7 @@ Authentication guards determine:
 
 Guard resolution is centralised using a dedicated resolver service, ensuring consistent and deterministic behaviour across the system.
 
-Although Laravel technically allows multiple guards to be authenticated within the same browser session, the system enforces a **single active authentication context** per session. If multiple guards are detected, resolution follows a deterministic priority order defined in `App\Constants\Guards::priority()`.
+Although Laravel technically allows multiple guards to be authenticated within the same browser session, the system enforces a **single active authentication context** per session. If multiple guards are detected, resolution follows a deterministic priority order defined in `App\Constants\Guards::resolutionOrder()`.
 
 Invalid or transitional states are resolved through controlled redirection and session reset mechanisms.
 

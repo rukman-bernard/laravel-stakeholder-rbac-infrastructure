@@ -3,30 +3,41 @@
 ## Status
 Accepted
 
+---
+
 ## Context
 
-The infrastructure uses Laravel multi-guard authentication to isolate stakeholder domains such as internal users, students, and employers.
+The system uses multi-guard authentication and guard-scoped RBAC entities.
 
-Roles and permissions are scoped by guard within the RBAC layer. This means each role or permission is associated with a specific authentication guard and is expected to operate only within that guard context.
+Guard behaviour, classification, and resolution are defined in:
 
-During evaluation of external RBAC implementations ([Redis-Backed RBAC Evaluation](../case-studies/redis-rbac-evaluation.md)), it was observed that guard-scoped entities could be created using arbitrary guard names, even when those guards were not defined in Laravel's `config/auth.php` configuration. A similar gap was identified within this infrastructure artefact.
+→ [Authentication & Guards](../architecture/auth-and-guards.md)
 
-If roles or permissions are created with non-existent guards:
+During evaluation of external RBAC implementations  
+([Redis-Backed RBAC Evaluation](../case-studies/redis-rbac-evaluation.md)), it was observed that guard-scoped entities could be created using arbitrary guard names, including values not defined in the authentication configuration.
 
-- the database may contain invalid RBAC records
+A similar gap was identified within this infrastructure artefact.
+
+If roles or permissions are created with invalid or non-existent guards:
+
+- RBAC records may not reflect actual authentication contexts
 - authorisation behaviour may become ambiguous
-- debugging becomes more difficult because guard metadata no longer reflects the actual authentication system
-- future integrations and UI workflows may present invalid choices to developers or administrators
+- debugging and reasoning about access control becomes difficult
+- UI and administrative workflows may expose invalid options
 
-Because guards are part of the core authentication architecture, RBAC entity creation must remain aligned with the configured authentication model.
+RBAC entity creation must therefore be aligned with the system’s guard model.
 
 ---
 
 ## Decision
 
-Guard names used during role and permission creation are validated against the configured Laravel authentication guards.
+Guard names used during role and permission creation are validated using the application guard abstraction.
 
-Only values returned from `array_keys(config('auth.guards'))` are considered valid for RBAC entity creation and update operations.
+Only values returned from:
+
+`App\Constants\Guards::configured()`
+
+are considered valid for RBAC entity creation and update operations.
 
 This validation applies to:
 
@@ -34,33 +45,37 @@ This validation applies to:
 - role creation
 - any form, Livewire component, seeder, or service that accepts guard input for RBAC entities
 
-User-facing selection controls restrict available options to configured guards rather than allowing free-form guard input.
+User-facing selection controls must restrict available options to configured guards rather than allowing free-form input.
 
 ---
 
 ## Rationale
 
-Roles and permissions are meaningful only when tied to a valid authentication context.
+RBAC entities are meaningful only when associated with valid authentication contexts.
 
-Validating guard names against Laravel's configured guards provides:
+The system follows a two-layer guard model:
 
-- consistency between the RBAC layer and the authentication layer
-- prevention of invalid or orphaned RBAC records
-- clearer reasoning about authorisation scope
-- safer administration workflows
-- stronger support for multi-guard boundary enforcement
+1. Laravel configuration (`config/auth.php`) defines available guards at runtime  
+2. The application guard registry (`App\Constants\Guards`) defines which guards are recognised by the infrastructure  
 
-This decision keeps RBAC configuration aligned with the infrastructure's multi-guard design and avoids treating guard names as arbitrary metadata.
+This ensures that newly introduced guards are explicitly adopted into the application model rather than becoming implicitly usable through configuration alone.
+
+Validating guard input through `Guards::configured()`:
+
+- aligns RBAC behaviour with authentication configuration
+- prevents creation of invalid or orphaned guard-scoped entities
+- maintains consistency across validation, UI, and service layers
+- supports strict multi-guard boundary enforcement
 
 ---
 
 ## Consequences
 
-- RBAC creation flows become stricter and reject invalid guard names
-- forms and administrative interfaces must source guard options from `config('auth.guards')`
-- seeders and automated setup routines must use configured guards only
-- existing records created with invalid guards may require review or cleanup
-- the RBAC layer becomes more predictable and aligned with Laravel's authentication configuration
+- RBAC creation flows reject invalid or unrecognised guard names
+- UI components must source guard options from `Guards::configured()`
+- seeders and automated workflows must use configured guards only
+- existing data may require validation or cleanup if invalid guards were previously used
+- the RBAC layer becomes more predictable and aligned with system architecture
 
 ---
 
