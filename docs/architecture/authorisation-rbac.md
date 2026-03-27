@@ -1,22 +1,32 @@
 # Authorisation (RBAC)
 
-This document describes how the system implements **authorisation** using **role-based access control (RBAC)**. It complements `Authentication & Guards.md`, which focuses on **authentication** (multi-guard login contexts).
+This document describes how the system implements **authorisation** using **role-based access control (RBAC)**.
 
-In this project:
-- **Authentication** is handled using Laravel guards (`web`, `student`, `employer`).
-- **Authorisation** is applied to **internal users authenticated under the `web` guard** using **Spatie Roles & Permissions**.
+It complements:
+
+→ [Authentication & Guards](./auth-and-guards.md)
+
+which defines:
+
+- guard classification  
+- authentication context isolation  
+- deterministic guard resolution  
 
 ---
 
 ## Scope
 
-RBAC is currently used to control access for the following internal user roles:
+RBAC is currently used to control access for internal users authenticated under the `web` guard.
+
+The internal roles supported are:
 
 - **sysadmin**
 - **superadmin**
 - **admin**
 
-RBAC is not currently applied to student or employer portals. Guard isolation provides sufficient separation for those stakeholders at this stage. If future requirements introduce role hierarchies within those portals, RBAC can be extended per guard without architectural change.
+RBAC is not currently applied to student or employer portals. Guard isolation provides sufficient separation for those stakeholders at this stage.
+
+If future requirements introduce role hierarchies within those portals, RBAC can be extended per guard without structural changes.
 
 ---
 
@@ -24,13 +34,13 @@ RBAC is not currently applied to student or employer portals. Guard isolation pr
 
 ### Roles
 
-Roles represent high-level responsibility and access scope within the `web` guard.
+Roles represent high-level responsibility and access scope within a guard.
 
 The internal user roles defined in this system are:
 
-- `sysadmin` — system-level administration and security-sensitive operations
-- `superadmin` — full administrative access (excluding sysadmin-only functions)
-- `admin` — standard administrative access
+- `sysadmin` — system-level administration and security-sensitive operations  
+- `superadmin` — full administrative access (excluding sysadmin-only functions)  
+- `admin` — standard administrative access  
 
 Role keys are centralised in:
 
@@ -49,20 +59,20 @@ Permission keys are centralised in:
 
 - `App\Constants\Permissions`
 
-Typical permission naming follows a consistent verb–resource pattern:
+Naming convention:
 
-- `view <resource>`
-- `create <resource>`
-- `edit <resource>`
-- `delete <resource>`
-- `assign <resource>`
+- `view <resource>`  
+- `create <resource>`  
+- `edit <resource>`  
+- `delete <resource>`  
+- `assign <resource>`  
 
 Examples:
 
-- `view users`
-- `create users`
-- `edit roles`
-- `assign permissions`
+- `view users`  
+- `create users`  
+- `edit roles`  
+- `assign permissions`  
 
 This naming convention improves clarity, maintainability, and enforcement consistency.
 
@@ -70,17 +80,21 @@ This naming convention improves clarity, maintainability, and enforcement consis
 
 ## Guard Policy
 
+Guard behaviour, classification, and validation are defined in:
+
+→ [Authentication & Guards](./auth-and-guards.md)
+
 ### Internal Users (`web` guard)
 
-- All internal users authenticate under the `web` guard.
-- Differentiation between internal users is achieved using Spatie roles and permissions.
-- Dashboard routing, menu visibility, and feature access are role- and permission-driven.
+- All internal users authenticate under the `web` guard  
+- Differentiation is achieved using roles and permissions  
+- Dashboard routing, menu visibility, and feature access are role- and permission-driven  
 
 ### Portal Stakeholders (`student`, `employer`)
 
-- Students and employers authenticate under separate guards.
-- Their portals are isolated at the guard level.
-- RBAC is not currently required for these stakeholders but remains extensible.
+- Students and employers authenticate under separate guards  
+- Access is isolated at the authentication level  
+- RBAC is not currently required but remains extensible  
 
 ---
 
@@ -88,12 +102,14 @@ This naming convention improves clarity, maintainability, and enforcement consis
 
 Authorisation is enforced at multiple layers to ensure defence-in-depth.
 
+---
+
 ### 1️⃣ Route and Middleware Protection
 
 Sensitive routes are protected using:
 
-- `auth:web`
-- Role or permission checks where required
+- `auth:web`  
+- permission checks where required  
 
 This ensures unauthorised access cannot occur via direct URL navigation.
 
@@ -101,86 +117,105 @@ This ensures unauthorised access cannot occur via direct URL navigation.
 
 ### 2️⃣ Livewire Component Enforcement
 
-Livewire components enforce permissions using a standardised trait:
+Livewire components enforce permissions using:
 
 - `App\Traits\AuthorizesWithPermissions`
 
-This trait centralises permission checks and ensures consistent behaviour across components.
+Typical usage:
 
-Typical enforcement patterns include:
+```php
+$this->authorizePermission('permission-key');
+```
+This centralises permission checks and ensures consistent enforcement across components.
 
-- `$this->authorizePermission('permission-key');`
-- Laravel’s built-in `authorize()` mechanisms where appropriate
-
-This prevents duplication of permission logic and improves readability.
-
----
+***
 
 ### 3️⃣ Blade UI Visibility
 
 UI elements (menus, buttons, sections) are conditionally displayed using:
 
-- `@can`
-- `@cannot`
+* `@can`
+* `@cannot`
 
-UI checks are treated as a usability layer only.  
-Server-side route and component enforcement remains the authoritative security boundary.
+UI checks are a usability layer only.\
+Server-side enforcement remains the authoritative security boundary.
 
----
+***
 
 ## Dashboard Resolution Strategy (Web Guard)
 
 Internal user dashboard resolution is role-aware:
 
-- `sysadmin` → sysadmin dashboard
-- `admin` / `superadmin` → admin dashboard
+* `sysadmin` → sysadmin dashboard
+* `admin` / `superadmin` → admin dashboard
 
-Dashboard resolution is handled centrally by:
+Dashboard resolution is handled by:
 
-- `App\Services\Auth\DashboardResolver`
+* `App\Services\Auth\DashboardResolver`
 
-Route mappings are defined in:
+Configuration:
 
-- `config/nka.php` → `dashboard_routes`
+* `config/nka.php` → `dashboard_routes`
 
-Runtime AdminLTE configuration is applied by:
+Runtime UI behaviour:
 
-- `App\Services\AdminLTE\AdminLTESettingsService`
+* `App\Services\AdminLTE\AdminLTESettingsService`
 
-This ensures dashboard URLs, UI titles, and layout behaviour remain consistent and configuration-driven.
+***
 
----
+## Guard Validation (RBAC Creation)
+
+Guard validation for RBAC entities follows the system’s guard model.
+
+Only guards returned by:
+
+```
+Guards::configured()
+```
+
+are accepted during:
+
+* role creation
+* permission creation
+
+See:
+
+→ [ADR-008: Guard Validation for RBAC Entity Creation](../decisions/ADR-008-guard-validation-for-rbac-creation.md)
+
+***
 
 ## Database Tables (Authorisation)
 
-Spatie Roles & Permissions uses the following tables:
+Spatie Roles & Permissions uses:
 
-- `roles`
-- `permissions`
-- `model_has_roles`
-- `model_has_permissions`
-- `role_has_permissions`
+* `roles`
+* `permissions`
+* `model_has_roles`
+* `model_has_permissions`
+* `role_has_permissions`
 
-Internal user accounts are stored in:
+Internal users:
 
-- `users` (authenticated under the `web` guard)
+* `users` table (under `web` guard)
 
----
+***
 
 ## Extensibility
 
-The RBAC architecture supports extension without structural change:
+The RBAC architecture supports extension without structural changes:
 
-- Additional roles can be introduced per guard.
-- Permissions can be expanded using the same naming convention.
-- Enforcement remains consistent through the shared trait and service-based resolution.
+* additional roles can be introduced per guard
+* permissions can be expanded using the same naming convention
+* enforcement remains consistent through shared traits and services
 
----
+***
 
 ## Summary
 
-- Guards isolate authentication contexts (who is logged in).
-- Spatie RBAC controls authorisation (what a user can do) within the `web` guard.
-- Internal users share the `web` guard and are differentiated using roles and permissions.
-- Permission enforcement is centralised and consistent.
-- The design supports future expansion without guard-role coupling.
+* Guards define authentication context (who is logged in)
+* RBAC defines access control (what a user can do)
+* Internal users share the `web` guard and are differentiated using roles and permissions
+* Guard validation ensures RBAC remains aligned with authentication architecture
+* The system supports future extension without coupling guards and roles
+
+```
