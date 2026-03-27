@@ -77,12 +77,7 @@ final class GuardResolver
      */
     public function configuredSessionGuardsInResolutionOrder(): array
     {
-        $base = Guards::session();
-
-        $ordered = array_values(array_intersect(Guards::resolutionOrder(), $base));
-        $remaining = array_values(array_diff($base, $ordered));
-
-        return array_values(array_merge($ordered, $remaining));
+        return Guards::resolutionOrder();
     }
 
     private function isGuardConfigured(string $guard): bool
