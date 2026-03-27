@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Auth;
 final class GuardResolver
 {
     /**
-     *
      * Detect the active guard by evaluating guards in deterministic resolution order.
      * The first authenticated guard is treated as active.
      *
@@ -20,7 +19,7 @@ final class GuardResolver
         $guardsToCheck = $this->normalizeGuards($guards);
 
         foreach ($guardsToCheck as $guard) {
-            if ($this->isGuardConfigured($guard) && Auth::guard($guard)->check()) {
+            if (Auth::guard($guard)->check()) {
                 return $guard;
             }
         }
@@ -71,17 +70,12 @@ final class GuardResolver
     }
 
     /**
-     * Session guards configured in auth.php, returned in Guards::resolutionOrder() order.
+     * Configured session guards in deterministic resolution order.
      *
      * @return array<string>
      */
     public function configuredSessionGuardsInResolutionOrder(): array
     {
         return Guards::resolutionOrder();
-    }
-
-    private function isGuardConfigured(string $guard): bool
-    {
-        return array_key_exists($guard, config('auth.guards', []));
     }
 }
