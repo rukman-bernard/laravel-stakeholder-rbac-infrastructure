@@ -323,6 +323,23 @@ For detailed research background see:
 
 ---
 
+## Latest Release
+
+### v1.1.0 — Guard-Safe RBAC & Authentication Flow Stabilisation
+
+This release introduces key improvements to RBAC correctness, guard validation, and authentication flow stability.
+
+**Highlights:**
+
+- Guard validation enforced via ADR-008  
+- Prevention of cross-guard role and permission assignment  
+- Improved permission management UI (direct vs inherited separation)  
+- Refined handling of expired and invalid email verification links  
+
+For full details, see the GitHub release notes.
+
+---
+
 ## License
 
 This project is licensed under the **MIT License**.
