@@ -18,7 +18,7 @@ class UserPermissionsForm extends Component
     public $user;
 
     public $roles = [];
-    public $permissions = [];
+    public $allPermissions = [];
 
     public $selectedRoles = [];
     public $selectedPermissions = [];
@@ -39,7 +39,7 @@ class UserPermissionsForm extends Component
             ->where('guard_name', $this->guard)
             ->get();
 
-        $this->permissions = Permission::query()
+        $this->allPermissions = Permission::query()
             ->where('guard_name', $this->guard)
             ->get();
 
@@ -52,6 +52,44 @@ class UserPermissionsForm extends Component
             ->where('guard_name', $this->guard)
             ->pluck('id')
             ->toArray();
+    }
+
+    public function getInheritedPermissionsProperty()
+    {
+        if (empty($this->selectedRoles)) {
+            return collect();
+        }
+
+        return Permission::query()
+            ->where('guard_name', $this->guard)
+            ->whereHas('roles', function ($query) {
+                $query->whereIn('roles.id', $this->selectedRoles);
+            })
+            ->orderBy('name')
+            ->get()
+            ->unique('id')
+            ->values();
+    }
+
+    public function getSelectablePermissionsProperty()
+    {
+        $inheritedIds = $this->inheritedPermissions->pluck('id')->all();
+
+        return $this->allPermissions
+            ->reject(fn ($permission) => in_array($permission->id, $inheritedIds, true))
+            ->sortBy('name')
+            ->values();
+    }
+
+    public function updatedSelectedRoles(): void
+    {
+        $inheritedIds = $this->inheritedPermissions->pluck('id')->all();
+
+        // Remove any direct selections that are now inherited via roles
+        $this->selectedPermissions = array_values(array_diff(
+            $this->selectedPermissions,
+            $inheritedIds
+        ));
     }
 
     public function save(): void
@@ -75,11 +113,14 @@ class UserPermissionsForm extends Component
 
         $this->user->syncPermissions($permissions);
 
-        session()->flash('message', 'Roles and permissions updated successfully!');
+        session()->flash('message', 'Roles and direct permissions updated successfully!');
     }
 
     public function render()
     {
-        return view('livewire.sysadmin.spatie.user-permissions-form');
+        return view('livewire.sysadmin.spatie.user-permissions-form', [
+            'inheritedPermissions' => $this->inheritedPermissions,
+            'selectablePermissions' => $this->selectablePermissions,
+        ]);
     }
 }
