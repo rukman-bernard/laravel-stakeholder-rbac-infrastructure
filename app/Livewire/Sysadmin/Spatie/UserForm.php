@@ -58,7 +58,7 @@ class UserForm extends Component
             ],
             'password' => $this->user ? 'nullable|min:6' : 'required|min:6',
 
-            // 🔥 validate roles belong to web guard
+            // validate roles belong to web guard
             'roles' => [
                 'array',
                 Rule::in($this->availableRoleNames())
@@ -93,7 +93,7 @@ class UserForm extends Component
 
         $user->save();
 
-        // 🔥 safe assignment (web guard only)
+        // safe assignment (web guard only)
         $user->syncRoles($this->roles);
 
         session()->flash('message', 'User saved successfully!');
