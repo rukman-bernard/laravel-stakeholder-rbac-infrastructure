@@ -2,20 +2,17 @@
 
 namespace App\Livewire\Sysadmin\Spatie;
 
-use Livewire\Component;
+use App\Constants\Guards;
 use App\Constants\Permissions as PermissionKeys;
-use App\Traits\AuthorizesWithPermissions;
 use App\Models\User;
-use Livewire\Attributes\Layout;
-use Spatie\Permission\Models\Role;
+use App\Traits\AuthorizesWithPermissions;
+use Livewire\Component;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
-
-// #[Layout('sysadmin.permissions')]
 class UserPermissionsForm extends Component
 {
     use AuthorizesWithPermissions;
-
 
     public $userId;
     public $user;
@@ -26,37 +23,60 @@ class UserPermissionsForm extends Component
     public $selectedRoles = [];
     public $selectedPermissions = [];
 
+    private string $guard = Guards::WEB;
+
     public function mount(User $user): void
     {
-        $this->authorizePermission(PermissionKeys::VIEW_USERS, 'You do not have permission to view users.');
+        $this->authorizePermission(
+            PermissionKeys::VIEW_USERS,
+            'You do not have permission to view users.'
+        );
 
         $this->user = $user;
         $this->userId = $user->id;
 
-        $this->roles = Role::all();
-        $this->permissions = Permission::all();
+        $this->roles = Role::query()
+            ->where('guard_name', $this->guard)
+            ->get();
 
-        $this->selectedRoles = $this->user->roles->pluck('id')->toArray();
-        $this->selectedPermissions = $this->user->permissions->pluck('id')->toArray();
+        $this->permissions = Permission::query()
+            ->where('guard_name', $this->guard)
+            ->get();
+
+        $this->selectedRoles = $this->user->roles()
+            ->where('guard_name', $this->guard)
+            ->pluck('id')
+            ->toArray();
+
+        $this->selectedPermissions = $this->user->permissions()
+            ->where('guard_name', $this->guard)
+            ->pluck('id')
+            ->toArray();
     }
 
     public function save(): void
     {
-        $this->authorizePermission(PermissionKeys::EDIT_USERS, 'You do not have permission to edit users.');
+        $this->authorizePermission(
+            PermissionKeys::EDIT_USERS,
+            'You do not have permission to edit users.'
+        );
 
-        // Convert role IDs to role models
-        $roles = Role::whereIn('id', $this->selectedRoles)->get();
-        
-        // Sync roles (now using models)
+        $roles = Role::query()
+            ->where('guard_name', $this->guard)
+            ->whereIn('id', $this->selectedRoles)
+            ->get();
+
         $this->user->syncRoles($roles);
-        
-        // Sync permissions (already correct)
-        $permissions = Permission::whereIn('id', $this->selectedPermissions)->get();
+
+        $permissions = Permission::query()
+            ->where('guard_name', $this->guard)
+            ->whereIn('id', $this->selectedPermissions)
+            ->get();
+
         $this->user->syncPermissions($permissions);
-        
+
         session()->flash('message', 'Roles and permissions updated successfully!');
     }
-    
 
     public function render()
     {
